@@ -1,0 +1,5 @@
+{
+	"tasks": {
+		"reload": "scripts/reload.sh"
+	}
+}
