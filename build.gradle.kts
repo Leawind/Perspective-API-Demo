@@ -9,6 +9,14 @@ plugins {
 
 val props: Map<String, Any> = project.properties.mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
 
+val archivesBaseName = mod.id
+val archivesVersion = "${mod.version}-mc${mod.minecraftVersion}-${mod.loader}"
+
+tasks.withType<Jar>().configureEach {
+    archiveBaseName.set(archivesBaseName)
+    archiveVersion.set(archivesVersion)
+}
+
 modSettings {
     // https://stonecraft.meza.gg/docs/configuration
 
@@ -35,12 +43,20 @@ modSettings {
 }
 
 stonecutter {
-    replacements.string(current.parsed >= "1.20.6") {
+    // ResourceLocation -> Identifier
+    replacements.string(current.parsed >= "1.21.11") {
         replace(
             "net.minecraft.resources.ResourceLocation",
             "net.minecraft.resources.Identifier"
         )
         replace("ResourceLocation", "Identifier")
+    }
+    // Input -> ClientInput
+    replacements.string(current.parsed > "1.21") {
+        replace(
+            "net.minecraft.client.player.Input",
+            "net.minecraft.client.player.ClientInput"
+        )
     }
 }
 
@@ -74,6 +90,9 @@ repositories {
 
 val shadowBundle: Configuration by configurations.creating
 fun DependencyHandlerScope.shadowBundle(dependencyNotation: String) {
+    if (mod.isForge) {
+        add("forgeRuntimeLibrary", dependencyNotation)
+    }
     implementation(dependencyNotation)
     add("shadowBundle", dependencyNotation)
 }
@@ -87,8 +106,8 @@ fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
 }
 
 dependencies {
-    modImplAlias("io.github.leawind.perspectiveapi:perspective-api:0.1.0-beta-mc${mod.minecraftVersion}-${mod.loader}")
-    modImplAlias("dev.architectury:architectury-${mod.loader}:${project.property("mod.architectury_api_version")}")
+    modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.1.0-beta-mc${mod.minecraftVersion}-${mod.loader}")
+//    modImplAlias("dev.architectury:architectury-${mod.loader}:${project.property("mod.architectury_api_version")}")
 
     if (mod.isFabric) {
         // ModMenu (Fabric only)
@@ -121,6 +140,9 @@ dependencies {
 }
 
 tasks.shadowJar {
+    archiveBaseName.set(archivesBaseName)
+    archiveVersion.set(archivesVersion)
+
     configurations = listOf(shadowBundle)
 
     dependsOn(tasks.processResources)
@@ -140,6 +162,9 @@ tasks.shadowJar {
 }
 
 tasks.withType<RemapJarTask>().matching { it.name == "remapJar" }.configureEach {
+    archiveBaseName.set(archivesBaseName)
+    archiveVersion.set(archivesVersion)
+
     dependsOn(tasks.shadowJar)
     inputFile.set(tasks.shadowJar.flatMap { it.archiveFile })
 }

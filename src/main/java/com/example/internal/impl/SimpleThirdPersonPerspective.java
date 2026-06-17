@@ -1,11 +1,8 @@
 package com.example.internal.impl;
 
-import com.google.auto.service.AutoService;
-import io.github.leawind.perspectiveapi.api.Perspective;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
-import io.github.leawind.perspectiveapi.api.anno.CyclicPerspective;
-import io.github.leawind.perspectiveapi.api.context.PerspectiveTickContext;
-import io.github.leawind.perspectiveapi.internal.logic.AbstractPerspective;
+import io.github.leawind.perspectiveapi.api.context.PerspectiveRenderTickContext;
+import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import io.github.leawind.perspectiveapi.platform.api.Services;
 import net.minecraft.client.CameraType;
 import net.minecraft.resources.Identifier;
@@ -13,14 +10,10 @@ import net.minecraft.world.entity.Entity;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
-@SuppressWarnings("unused")
-@CyclicPerspective
-@AutoService(Perspective.class)
-public class ExamplePerspective extends AbstractPerspective {
-  public ExamplePerspective() {}
+public class SimpleThirdPersonPerspective extends AbstractPerspective {
+  public static final SimpleThirdPersonPerspective INSTANCE = new SimpleThirdPersonPerspective();
 
-  private static final Identifier ID =
-      Services.PLATFORM_HELPER.createIdentifier("example", "simple_third_person");
+  public static final Identifier ID = Bridge.createIdentifier("example", "simple_third_person");
 
   @Override
   public @NonNull Identifier id() {
@@ -33,13 +26,13 @@ public class ExamplePerspective extends AbstractPerspective {
   }
 
   @Override
-  public void tick(PerspectiveTickContext context) {
+  public void renderTick(PerspectiveRenderTickContext context) {
     Entity entity = context.entity();
     if (entity == null) {
       return;
     }
 
-    PerspectiveHelper.getRotation(entity.getRotationVector(), rotation);
+    PerspectiveHelper.getQuat(entity.getRotationVector(), rotation);
 
     var backward = PerspectiveHelper.getBackwardVector(rotation, new Vector3f());
     var right = PerspectiveHelper.getRightVector(rotation, new Vector3f());

@@ -1,5 +1,5 @@
 {
 	"tasks": {
-		"reload": "scripts/reload.sh"
+		"collect-src": "deno -A collect-src.ts -- . demo.txt"
 	}
 }

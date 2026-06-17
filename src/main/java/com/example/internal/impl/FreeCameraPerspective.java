@@ -1,0 +1,130 @@
+package com.example.internal.impl;
+
+import com.example.PerspectiveAPIDemo;
+import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
+import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
+import io.github.leawind.perspectiveapi.api.context.PerspectiveRenderTickContext;
+import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.NonNull;
+
+/** 自由移动视角：进入时位于玩家眼睛处，键盘控制移动，鼠标控制旋转，滚轮控制FOV。玩家不再移动或转动。 */
+@SuppressWarnings("unused")
+public class FreeCameraPerspective extends AbstractPerspective {
+  public static final FreeCameraPerspective INSTANCE = new FreeCameraPerspective();
+
+  public static final Identifier ID = Bridge.createIdentifier("example", "free_camera");
+
+  private static final double MOVE_SPEED = 10.0;
+
+  /** x=pitch, y=yaw */
+  private final Vector2f orientation = new Vector2f();
+
+  private long lastTickNanos = System.nanoTime();
+
+  private boolean needInit = true;
+
+  @Override
+  public @NonNull Identifier id() {
+    return ID;
+  }
+
+  @Override
+  public @NonNull CameraType cameraType() {
+    return CameraType.THIRD_PERSON_BACK;
+  }
+
+  private void applyMove(Vector3fc delta, float multiplier) {
+    applyMove(delta.mul(multiplier, new Vector3f()));
+  }
+
+  private void applyMove(Vector3f delta) {
+    rotation.transform(delta);
+    position.add(delta);
+  }
+
+  private void applyMove(Vector3fc delta) {
+    applyMove(new Vector3f(delta));
+  }
+
+  public void rotate(float deltaYaw, float deltaPitch) {
+    orientation.y += deltaYaw;
+    orientation.x = Math.max(-90f, Math.min(90f, orientation.x + deltaPitch));
+  }
+
+  @Override
+  public void onActivate() {
+    alignWithPlayer();
+    //    Vec2 rotVec = player.getRotationVector();
+    //    orientation.set(rotVec.x, rotVec.y);
+  }
+
+  @Override
+  public void renderTick(PerspectiveRenderTickContext context) {
+
+    if (context.isInTransition()) {
+      alignWithPlayer();
+    }
+
+    if (PerspectiveAPI.getManager().getCurrentPerspective() != this) {
+      PerspectiveAPIDemo.LOGGER.warn("Not active!!");
+    }
+
+    float deltaTime = (System.nanoTime() - lastTickNanos) / 1_000_000_000f;
+    lastTickNanos = System.nanoTime();
+
+    Entity entity = context.entity();
+
+    double moveAmount = MOVE_SPEED * deltaTime;
+
+    var minecraft = Minecraft.getInstance();
+    if (minecraft == null) return;
+
+    // moved by keyboard
+    var options = minecraft.options;
+    if (options != null) {
+      float multiplier = deltaTime * 10f;
+
+      if (options.keyUp.isDown()) {
+        applyMove(PerspectiveHelper.FORWARD, multiplier);
+      }
+      if (options.keyDown.isDown()) {
+        applyMove(PerspectiveHelper.BACKWARD, multiplier);
+      }
+      if (options.keyLeft.isDown()) {
+        applyMove(PerspectiveHelper.LEFT, multiplier);
+      }
+      if (options.keyRight.isDown()) {
+        applyMove(PerspectiveHelper.RIGHT, multiplier);
+      }
+      if (options.keyShift.isDown()) {
+        applyMove(PerspectiveHelper.DOWN, multiplier);
+      }
+      if (options.keyJump.isDown()) {
+        applyMove(PerspectiveHelper.UP, multiplier);
+      }
+    }
+
+    PerspectiveHelper.getQuat(orientation, rotation);
+  }
+
+  private void alignWithPlayer() {
+    var minecraft = Minecraft.getInstance();
+    if (minecraft == null) return;
+
+    var player = minecraft.player;
+    if (player == null) return;
+
+    Vec3 pos = player.getEyePosition(1);
+    position.set(pos.x, pos.y + 1, pos.z);
+
+    PerspectiveHelper.getEulerDeg(player.getViewVector(1).toVector3f(), orientation);
+  }
+}

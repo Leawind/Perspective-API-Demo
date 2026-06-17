@@ -2,7 +2,7 @@ package com.example.platform.neoforge;
 
 /*? if neoforge {*/
 /*import com.google.auto.service.AutoService;
-import io.github.leawind.perspectiveapi.platform.api.PlatformHelper;
+import com.example.platform.api.PlatformHelper;
 import net.neoforged.fml.loading.FMLLoader;
 
 @AutoService(PlatformHelper.class)

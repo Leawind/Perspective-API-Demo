@@ -29,7 +29,7 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.${ id }]]
-modId = "perspective-api"
+modId = "perspective_api"
 mandatory = true
 versionRange = "*"
 ordering = "NONE"

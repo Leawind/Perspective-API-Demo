@@ -6,7 +6,7 @@ set +a
 WD=`pwd`
 
 cd $MAVEN_LOCAL_PATH/repository
-rm -r io/github/leawind/perspectiveapi/perspective-api
+rm -r io/github/leawind/perspectiveapi/perspective_api
 
 cd $WD
 cd $MOD_SOURCE_PATH
