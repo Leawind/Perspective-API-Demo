@@ -6,6 +6,7 @@
 	"client": [
 		"ClientInputAccessor",
 		"LocalPlayerMixin",
+		"MinecraftMixin",
 		"MouseHandlerMixin"
 	],
 	"mixins": [

@@ -8,28 +8,22 @@ import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector2f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.NonNull;
 
-/** 自由移动视角：进入时位于玩家眼睛处，键盘控制移动，鼠标控制旋转，滚轮控制FOV。玩家不再移动或转动。 */
+/** 自由移动视角：进入时位于玩家眼睛处，键盘控制移动，鼠标控制旋转，Q/E滚转，滚轮控制FOV。玩家不再移动或转动。 */
 @SuppressWarnings("unused")
 public class FreeCameraPerspective extends AbstractPerspective {
   public static final FreeCameraPerspective INSTANCE = new FreeCameraPerspective();
 
   public static final Identifier ID = Bridge.createIdentifier("example", "free_camera");
 
-  private static final double MOVE_SPEED = 10.0;
-
-  /** x=pitch, y=yaw */
-  private final Vector2f orientation = new Vector2f();
+  private static final float ROLL_SPEED = 90.0f;
 
   private long lastTickNanos = System.nanoTime();
-
-  private boolean needInit = true;
 
   @Override
   public @NonNull Identifier id() {
@@ -55,15 +49,26 @@ public class FreeCameraPerspective extends AbstractPerspective {
   }
 
   public void rotate(float deltaYaw, float deltaPitch) {
-    orientation.y += deltaYaw;
-    orientation.x = Math.max(-90f, Math.min(90f, orientation.x + deltaPitch));
+    Quaternionf yawRot =
+        new Quaternionf().rotationAxis((float) Math.toRadians(deltaYaw), PerspectiveHelper.DOWN);
+    rotation.mul(yawRot, rotation);
+
+    Quaternionf pitchRot =
+        new Quaternionf()
+            .rotationAxis((float) Math.toRadians(-deltaPitch), PerspectiveHelper.RIGHT);
+    rotation.mul(pitchRot, rotation);
+  }
+
+  public void roll(float deltaRoll) {
+    Quaternionf rollRot =
+        new Quaternionf()
+            .rotationAxis((float) Math.toRadians(deltaRoll), PerspectiveHelper.FORWARD);
+    rotation.mul(rollRot, rotation);
   }
 
   @Override
   public void onActivate() {
     alignWithPlayer();
-    //    Vec2 rotVec = player.getRotationVector();
-    //    orientation.set(rotVec.x, rotVec.y);
   }
 
   @Override
@@ -73,46 +78,42 @@ public class FreeCameraPerspective extends AbstractPerspective {
       alignWithPlayer();
     }
 
-    if (PerspectiveAPI.getManager().getCurrentPerspective() != this) {
-      PerspectiveAPIDemo.LOGGER.warn("Not active!!");
-    }
-
     float deltaTime = (System.nanoTime() - lastTickNanos) / 1_000_000_000f;
     lastTickNanos = System.nanoTime();
-
-    Entity entity = context.entity();
-
-    double moveAmount = MOVE_SPEED * deltaTime;
 
     var minecraft = Minecraft.getInstance();
     if (minecraft == null) return;
 
-    // moved by keyboard
     var options = minecraft.options;
     if (options != null) {
-      float multiplier = deltaTime * 10f;
+      float moveMultiplier = deltaTime * 10f;
 
       if (options.keyUp.isDown()) {
-        applyMove(PerspectiveHelper.FORWARD, multiplier);
+        applyMove(PerspectiveHelper.FORWARD, moveMultiplier);
       }
       if (options.keyDown.isDown()) {
-        applyMove(PerspectiveHelper.BACKWARD, multiplier);
+        applyMove(PerspectiveHelper.BACKWARD, moveMultiplier);
       }
       if (options.keyLeft.isDown()) {
-        applyMove(PerspectiveHelper.LEFT, multiplier);
+        applyMove(PerspectiveHelper.LEFT, moveMultiplier);
       }
       if (options.keyRight.isDown()) {
-        applyMove(PerspectiveHelper.RIGHT, multiplier);
+        applyMove(PerspectiveHelper.RIGHT, moveMultiplier);
       }
       if (options.keyShift.isDown()) {
-        applyMove(PerspectiveHelper.DOWN, multiplier);
+        applyMove(PerspectiveHelper.DOWN, moveMultiplier);
       }
       if (options.keyJump.isDown()) {
-        applyMove(PerspectiveHelper.UP, multiplier);
+        applyMove(PerspectiveHelper.UP, moveMultiplier);
+      }
+
+      if (options.keyDrop.isDown()) {
+        roll(-ROLL_SPEED * deltaTime);
+      }
+      if (options.keyInventory.isDown()) {
+        roll(ROLL_SPEED * deltaTime);
       }
     }
-
-    PerspectiveHelper.getQuat(orientation, rotation);
   }
 
   private void alignWithPlayer() {
@@ -125,6 +126,6 @@ public class FreeCameraPerspective extends AbstractPerspective {
     Vec3 pos = player.getEyePosition(1);
     position.set(pos.x, pos.y + 1, pos.z);
 
-    PerspectiveHelper.getEulerDeg(player.getViewVector(1).toVector3f(), orientation);
+    PerspectiveHelper.getQuat(player.getRotationVector(), rotation);
   }
 }

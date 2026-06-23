@@ -79,6 +79,20 @@ public final class ModEvents {
             impulse.set(0);
           }
         });
+    GameClientEvents.HANDLE_KEYBINDS_START.on(
+        (minecraft) -> {
+          if (!manager.isCurrent(FreeCameraPerspective.INSTANCE)) return;
+
+          while (minecraft.options.keyUp.consumeClick()) {}
+          while (minecraft.options.keyDown.consumeClick()) {}
+          while (minecraft.options.keyLeft.consumeClick()) {}
+          while (minecraft.options.keyRight.consumeClick()) {}
+          while (minecraft.options.keyJump.consumeClick()) {}
+          while (minecraft.options.keyShift.consumeClick()) {}
+
+          while (minecraft.options.keyInventory.consumeClick()) {}
+          while (minecraft.options.keyDrop.consumeClick()) {}
+        });
 
     // endregion
   }
