@@ -1,7 +1,5 @@
 package com.example.internal.impl;
 
-import com.example.PerspectiveAPIDemo;
-import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveRenderTickContext;
 import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
@@ -126,6 +124,6 @@ public class FreeCameraPerspective extends AbstractPerspective {
     Vec3 pos = player.getEyePosition(1);
     position.set(pos.x, pos.y + 1, pos.z);
 
-    PerspectiveHelper.getQuat(player.getRotationVector(), rotation);
+    PerspectiveHelper.eulerDegToQuat(player.getRotationVector(), rotation);
   }
 }

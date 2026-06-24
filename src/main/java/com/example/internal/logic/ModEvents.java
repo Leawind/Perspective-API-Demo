@@ -28,6 +28,17 @@ public final class ModEvents {
           }
         });
 
+    GameClientEvents.MOUSE_SCROLL.on(
+        ctx -> {
+          var p = FreeThirdPersonPerspective.INSTANCE;
+          if (Minecraft.getInstance().isPaused()) return;
+          if (manager.isCurrent(p)) {
+            float factor = (float) Math.pow(1.1487, -ctx.yOffset);
+            p.smoothFovHalfTan.setTarget(p.smoothFovHalfTan.getTarget() * factor);
+            ctx.cancelDefault = true;
+          }
+        });
+
     GameClientEvents.TICK_KEYBOARD_INPUT.on(
         impulse -> {
           if (manager.isCurrent(FreeThirdPersonPerspective.INSTANCE)) {
@@ -38,7 +49,7 @@ public final class ModEvents {
 
             Quaternionfc perspectiveRotation = FreeThirdPersonPerspective.INSTANCE.getRotation();
             Quaternionf playerRotation =
-                PerspectiveHelper.getQuat(player.getRotationVector(), new Quaternionf());
+                PerspectiveHelper.eulerDegToQuat(player.getRotationVector(), new Quaternionf());
 
             // 视角空间下的移动向量
             var moveVector = new Vector3f(-impulse.x, 0, -impulse.y);
@@ -54,7 +65,7 @@ public final class ModEvents {
               var movement = player.getDeltaMovement();
               if (movement.lengthSqr() > 0.01f) {
                 var orientation =
-                    PerspectiveHelper.getEulerDeg(movement.toVector3f(), new Vector2f());
+                    PerspectiveHelper.viewVectorToEulerDeg(movement.toVector3f(), new Vector2f());
                 player.setYRot(orientation.y);
               }
             }
