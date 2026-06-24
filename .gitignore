@@ -57,5 +57,7 @@ forge*changelog.txt
 .opencode/
 .trae/
 
+AGENTS.md
+
 # stonecraft
 /versions/*-*/
