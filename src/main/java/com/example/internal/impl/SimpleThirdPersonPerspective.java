@@ -38,11 +38,4 @@ public class SimpleThirdPersonPerspective extends AbstractPerspective {
     var pos = entity.getEyePosition(context.partialTicks());
     position.set(pos.x, pos.y + 1, pos.z).add(backward.mul(2.5f)).add(right.mul(1));
   }
-
-  // TODO override fov
-
-  @Override
-  public Float getFieldOfView() {
-    return null;
-  }
 }

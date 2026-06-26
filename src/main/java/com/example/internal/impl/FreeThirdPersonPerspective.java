@@ -39,9 +39,7 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
     return frustumHalfHeight / smoothFovHalfTan.get(now);
   }
 
-  @Override
-  public Float getFieldOfView() {
-    // 希区柯克式变焦
+  private float getFieldOfViewValue() {
     double now = System.currentTimeMillis();
     return (float) (2 * Math.atan(smoothFovHalfTan.get(now)) * 180d / Math.PI);
   }
@@ -102,7 +100,9 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
             (float) (eyePos.x - position.x),
             (float) (eyePos.y - position.y),
             (float) (eyePos.z - position.z));
-    
+
     PerspectiveHelper.viewVectorToQuat(viewVectorToEntity, rotation);
+    state.fieldOfView = getFieldOfViewValue();
+    state.hasFieldOfView = true;
   }
 }
