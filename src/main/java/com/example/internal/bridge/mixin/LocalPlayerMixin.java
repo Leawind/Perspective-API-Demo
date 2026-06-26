@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class LocalPlayerMixin {
   @Shadow public net.minecraft.client.player.ClientInput input;
 
-  /// TODO 1.20.4 ?: [1.20.4, 1.21.11)
   @Inject(
       method = "aiStep",
       at =

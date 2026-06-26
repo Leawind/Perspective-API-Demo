@@ -19,7 +19,6 @@ public final class ModEvents {
   public static void register() {
     var manager = PerspectiveAPI.getManager();
 
-    // region FreeThirdPersonPerspective
     GameClientEvents.MOUSE_TURN_PLAYER.on(
         e -> {
           if (manager.isCurrent(FreeThirdPersonPerspective.INSTANCE)) {
@@ -51,16 +50,13 @@ public final class ModEvents {
             Quaternionf playerRotation =
                 PerspectiveHelper.eulerDegToQuat(player.getRotationVector(), new Quaternionf());
 
-            // 视角空间下的移动向量
             var moveVector = new Vector3f(-impulse.x, 0, -impulse.y);
 
-            { // 将向量从"视角局部空间"变换到"世界空间"
+            {
               perspectiveRotation.transform(moveVector, moveVector);
-              // 将"世界空间"下的向量变换到"玩家局部空间"（应用玩家旋转的逆矩阵）
               playerRotation.transformInverse(moveVector, moveVector);
             }
 
-            // 旋转玩家到移动方向
             {
               var movement = player.getDeltaMovement();
               if (movement.lengthSqr() > 0.01f) {
@@ -74,9 +70,7 @@ public final class ModEvents {
             impulse.y = -moveVector.z;
           }
         });
-    // endregion
 
-    // region FreeCameraPerspective
     GameClientEvents.MOUSE_TURN_PLAYER.on(
         e -> {
           if (manager.isCurrent(FreeCameraPerspective.INSTANCE)) {
@@ -104,7 +98,5 @@ public final class ModEvents {
           while (minecraft.options.keyInventory.consumeClick()) {}
           while (minecraft.options.keyDrop.consumeClick()) {}
         });
-
-    // endregion
   }
 }

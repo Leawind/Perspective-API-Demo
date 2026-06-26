@@ -21,7 +21,6 @@ public class MouseHandlerMixin {
   @Shadow private double accumulatedDX;
   @Shadow private double accumulatedDY;
 
-  /// 在根据鼠标位移转动玩家前触发
   /*? if >=1.21.11 {*/
   @ModifyArgs(
       method = "turnPlayer(D)V",

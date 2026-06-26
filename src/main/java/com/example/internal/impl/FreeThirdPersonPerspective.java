@@ -13,18 +13,16 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
-/** 自由第三人称视角：相机围绕玩家旋转，始终朝向玩家。鼠标移动只旋转相机，不旋转玩家。 */
+/// - camera orbits around the player and always faces it.
+/// - Mouse movement only rotates the camera, not the player.
 @SuppressWarnings("unused")
 public class FreeThirdPersonPerspective extends AbstractPerspective {
   public static final FreeThirdPersonPerspective INSTANCE = new FreeThirdPersonPerspective();
 
   public static final Identifier ID = Bridge.createIdentifier("example", "free_third_person");
 
-  /** x=pitch, y=yaw */
   private final Vector2f eulerDeg = new Vector2f();
 
-  // region dolly zoom
-  /// S = d * tan(FOV/2)
   private static double getFrustumHalfHeight(double distance, float fovDeg) {
     double fovRad = fovDeg / 180d * Math.PI;
     return distance * Math.tan(fovRad / 2);
@@ -32,7 +30,6 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
 
   public double frustumHalfHeight = getFrustumHalfHeight(4.0, 70.0f);
 
-  /// tan(FOV/2)
   public final ExpSmoothDouble smoothFovHalfTan = new ExpSmoothDouble(100, frustumHalfHeight / 4.0);
 
   public double getDistance(double now) {
@@ -43,8 +40,6 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
     double now = System.currentTimeMillis();
     return (float) (2 * Math.atan(smoothFovHalfTan.get(now)) * 180d / Math.PI);
   }
-
-  // endregion
 
   private boolean needInit = true;
 
@@ -88,13 +83,11 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
       needInit = false;
     }
 
-    // 欧拉角 → 旋转，用于计算相机位置
     PerspectiveHelper.eulerDegToQuat(eulerDeg, rotation);
     var backward = PerspectiveHelper.getBackwardVector(rotation, new Vector3f());
     double now = System.currentTimeMillis();
     position.set(eyePos.x, eyePos.y, eyePos.z).add(backward.mul((float) getDistance(now)));
 
-    // 相机始终朝向玩家
     Vector3f viewVectorToEntity =
         new Vector3f(
             (float) (eyePos.x - position.x),

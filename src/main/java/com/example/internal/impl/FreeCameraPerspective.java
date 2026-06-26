@@ -12,7 +12,14 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.NonNull;
 
-/** 自由移动视角：进入时位于玩家眼睛处，键盘控制移动，鼠标控制旋转，Q/E滚转，滚轮控制FOV。玩家不再移动或转动。 */
+/// Free camera perspective:
+///
+/// - Keyboard controls movement
+/// - mouse controls rotation
+/// - Q/E roll
+/// - scroll wheel controls FOV
+///
+/// The player no longer moves or turns.
 @SuppressWarnings("unused")
 public class FreeCameraPerspective extends AbstractPerspective {
   public static final FreeCameraPerspective INSTANCE = new FreeCameraPerspective();

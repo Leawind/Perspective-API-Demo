@@ -14,9 +14,6 @@ public final class GameClientEvents {
   public static final SimpleEventEmitter.Owned<MouseScrollContext> MOUSE_SCROLL =
       SimpleEventEmitter.create();
 
-  /// 修改移动冲量，移动冲量由向前和向左的冲量组成
-  ///
-  /// 当玩家按下移动键（WASD）时，会触发此事件，并传递一个包含冲量值的上下文对象
   public static final SimpleEventEmitter.Owned<Vector2f> TICK_KEYBOARD_INPUT =
       SimpleEventEmitter.create();
 
