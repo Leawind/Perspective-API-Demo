@@ -58,6 +58,7 @@ forge*changelog.txt
 .trae/
 
 AGENTS.md
+AGENTS-*.md
 
 # stonecraft
 /versions/*-*/
