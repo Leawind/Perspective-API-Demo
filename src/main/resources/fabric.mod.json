@@ -23,6 +23,7 @@
   ],
   "depends": {
     "fabricloader": "*",
+    "perspective_api": "*",
     "minecraft": ">=${minecraftVersion}"
   },
   "recommends": {
