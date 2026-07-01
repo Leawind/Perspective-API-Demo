@@ -65,6 +65,19 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven("https://jitpack.io")
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = uri("https://api.modrinth.com/maven")
+            }
+        }
+        filter {
+            includeGroup("maven.modrinth")
+        }
+    }
+
     // Mod Menu (Fabric)
     maven {
         name = "Terraformers"
@@ -106,8 +119,8 @@ fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
 }
 
 dependencies {
-    modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.1.0-beta-mc${mod.minecraftVersion}-${mod.loader}")
-//    modImplAlias("dev.architectury:architectury-${mod.loader}:${project.property("mod.architectury_api_version")}")
+    // modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT-mc${mod.minecraftVersion}-${mod.loader}")
+     modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
 
     if (mod.isFabric) {
         // ModMenu (Fabric only)
