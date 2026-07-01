@@ -2,7 +2,7 @@ package com.example.internal.impl;
 
 import com.example.internal.utils.ExpSmoothDouble;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
-import io.github.leawind.perspectiveapi.api.context.PerspectiveRenderTickContext;
+import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -71,7 +71,7 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
   }
 
   @Override
-  public void renderTick(PerspectiveRenderTickContext context) {
+  public void renderTick(PerspectiveContext context) {
     Entity entity = context.entity();
     if (entity == null) return;
 
@@ -95,7 +95,10 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
             (float) (eyePos.z - position.z));
 
     PerspectiveHelper.viewVectorToQuat(viewVectorToEntity, rotation);
-    state.fieldOfView = getFieldOfViewValue();
-    state.hasFieldOfView = true;
+  }
+
+  @Override
+  public float applyFov(@NonNull PerspectiveContext ctx, float vanillaFovDeg) {
+    return getFieldOfViewValue();
   }
 }

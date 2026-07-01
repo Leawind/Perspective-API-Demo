@@ -1,7 +1,7 @@
 package com.example.internal.impl;
 
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
-import io.github.leawind.perspectiveapi.api.context.PerspectiveRenderTickContext;
+import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import net.minecraft.client.CameraType;
 import net.minecraft.resources.Identifier;
@@ -25,7 +25,7 @@ public class SimpleThirdPersonPerspective extends AbstractPerspective {
   }
 
   @Override
-  public void renderTick(PerspectiveRenderTickContext context) {
+  public void renderTick(PerspectiveContext context) {
     Entity entity = context.entity();
     if (entity == null) {
       return;

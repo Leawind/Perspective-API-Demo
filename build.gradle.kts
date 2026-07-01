@@ -120,7 +120,7 @@ fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
 
 dependencies {
     // modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT-mc${mod.minecraftVersion}-${mod.loader}")
-     modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+    modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
 
     if (mod.isFabric) {
         // ModMenu (Fabric only)

@@ -46,7 +46,7 @@ public final class ModEvents {
             var player = minecraft.player;
             if (player == null) return;
 
-            Quaternionfc perspectiveRotation = FreeThirdPersonPerspective.INSTANCE.getState().rotation;
+            Quaternionfc perspectiveRotation = FreeThirdPersonPerspective.INSTANCE.rotation;
             Quaternionf playerRotation =
                 PerspectiveHelper.eulerDegToQuat(player.getRotationVector(), new Quaternionf());
 

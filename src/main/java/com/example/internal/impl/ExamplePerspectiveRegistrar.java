@@ -2,7 +2,7 @@ package com.example.internal.impl;
 
 import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveManager;
-import io.github.leawind.perspectiveapi.spi.PerspectiveRegistrar;
+import io.github.leawind.perspectiveapi.api.spi.PerspectiveRegistrar;
 
 @SuppressWarnings("unused")
 @AutoService(PerspectiveRegistrar.class)
