@@ -10,6 +10,22 @@ pluginManagement {
         maven("https://maven.neoforged.net/releases/")
     }
 }
+
+// Load .env file into system properties
+rootDir.resolve(".env").takeIf { it.exists() }?.readLines()?.forEach { line ->
+    val trimmed = line.trim()
+    if (trimmed.isNotEmpty() && !trimmed.startsWith("#")) {
+        val eqIndex = trimmed.indexOf('=')
+        if (eqIndex > 0) {
+            val key = trimmed.substring(0, eqIndex).trim()
+            val value = trimmed.substring(eqIndex + 1).trim().removeSurrounding("\"").removeSurrounding("'")
+            if (System.getenv(key) == null) {
+                System.setProperty(key, value)
+            }
+        }
+    }
+}
+
 plugins {
     id("gg.meza.stonecraft") version "1.10.+"
     id("dev.kikugie.stonecutter") version "0.9.+"

@@ -119,8 +119,12 @@ fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
 }
 
 dependencies {
-    // modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT-mc${mod.minecraftVersion}-${mod.loader}")
-    modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+    val perspectiveApiDir = System.getenv("PERSPECTIVE_API_DIR") ?: System.getProperty("PERSPECTIVE_API_DIR")
+    if (!perspectiveApiDir.isNullOrBlank()) {
+        modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT-mc${mod.minecraftVersion}-${mod.loader}")
+    } else {
+        modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+    }
 
     if (mod.isFabric) {
         // ModMenu (Fabric only)

@@ -1,19 +1,19 @@
 #!/bin/bash
+set -euo pipefail
 
-set -a
+WD="$(pwd)"
+MAVEN_REPO=~/.m2/repository
+
 source .env
-set +a
 
-WD=`pwd`
+# Clean stale maven local cache
+rm -rf "$MAVEN_REPO/io/github/leawind/perspectiveapi/perspective_api"
 
-cd $MAVEN_LOCAL_PATH/repository
-rm -r io/github/leawind/perspectiveapi/perspective_api
-
-cd $WD
-cd $MOD_SOURCE_PATH
+# Build and publish Perspective API to maven local
+cd "$PERSPECTIVE_API_DIR"
 ./gradlew build -x test --offline
 ./gradlew publishToMavenLocal --offline --no-parallel
 
-cd $WD
-rm -r .gradle/loom-cache/remapped_mods/remapped/io/github/leawind/perspectiveapi
-
+# Clear loom cache
+cd "$WD"
+rm -rf .gradle/loom-cache/remapped_mods/remapped/io/github/leawind/perspectiveapi
