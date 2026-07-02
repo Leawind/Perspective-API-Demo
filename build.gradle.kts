@@ -167,6 +167,15 @@ if (mod.isForge) {
         dependsOn("generatePackMCMetaJson")
     }
 }
+
+loom {
+    if (mod.isForge) {
+        forge {
+            mixinConfig("${mod.id}.mixins.json")
+        }
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }
