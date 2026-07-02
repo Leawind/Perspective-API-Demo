@@ -3,7 +3,6 @@ import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.util.internal.VersionNumber
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.10"
     id("gg.meza.stonecraft")
 }
 
@@ -101,15 +100,6 @@ repositories {
     }
 }
 
-val shadowBundle: Configuration by configurations.creating
-fun DependencyHandlerScope.shadowBundle(dependencyNotation: String) {
-    if (mod.isForge) {
-        add("forgeRuntimeLibrary", dependencyNotation)
-    }
-    implementation(dependencyNotation)
-    add("shadowBundle", dependencyNotation)
-}
-
 fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
     if (VersionNumber.parse(mod.minecraftVersion) >= VersionNumber.parse("26.1")) {
         implementation(dependencyNotation)
@@ -132,10 +122,6 @@ dependencies {
         modImplAlias("com.terraformersmc:modmenu:${project.property("mod.modmenu_version")}")
     }
 
-    // region bundled (shadowed)
-    shadowBundle("com.github.Leawind:inventory-java:0.4.0")
-    // endregion
-
     // region test
     testCompileOnly("org.jspecify:jspecify:1.0.0")
 
@@ -156,38 +142,9 @@ dependencies {
     // endregion
 }
 
-tasks.shadowJar {
-    archiveBaseName.set(archivesBaseName)
-    archiveVersion.set(archivesVersion)
-
-    configurations = listOf(shadowBundle)
-
-    dependsOn(tasks.processResources)
-    tasks.findByName("generatePackMCMetaJson")?.let { dependsOn(it) }
-
-    if (tasks.findByName("remapJar") == null) {
-        archiveClassifier.set("")
-    } else {
-        archiveClassifier.set("shadow")
-    }
-
-    minimize()
-
-    val dest = "${project.property("mod.group")}.lib"
-    // com.github.Leawind:inventory-java
-    relocate("io.github.leawind.inventory", "${dest}.inventory")
-}
-
 tasks.withType<RemapJarTask>().matching { it.name == "remapJar" }.configureEach {
     archiveBaseName.set(archivesBaseName)
     archiveVersion.set(archivesVersion)
-
-    dependsOn(tasks.shadowJar)
-    inputFile.set(tasks.shadowJar.flatMap { it.archiveFile })
-}
-
-tasks.assemble {
-    dependsOn(tasks.shadowJar)
 }
 
 if (mod.isFabric) {

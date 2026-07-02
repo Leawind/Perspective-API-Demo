@@ -1,7 +1,7 @@
 package com.example.internal.bridge.events;
 
 import com.example.internal.bridge.events.context.MouseTurnPlayerContext;
-import io.github.leawind.inventory.event.SimpleEventEmitter;
+import io.github.leawind.perspectiveapi.internal.utils.event.SimpleEventEmitter;
 import net.minecraft.client.Minecraft;
 import org.joml.Vector2f;
 
