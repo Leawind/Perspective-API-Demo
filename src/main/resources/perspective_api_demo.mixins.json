@@ -5,6 +5,7 @@
 	"minVersion": "0.8",
 	"client": [
 		"ClientInputAccessor",
+		"EntityMixin",
 		"LocalPlayerMixin",
 		"MinecraftMixin",
 		"MouseHandlerMixin"
