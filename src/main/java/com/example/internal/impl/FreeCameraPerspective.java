@@ -1,16 +1,18 @@
 package com.example.internal.impl;
 
+import io.github.leawind.perspectiveapi.api.Perspective;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.NonNull;
+import org.lwjgl.glfw.GLFW;
 
 /// Free camera perspective:
 ///
@@ -21,14 +23,17 @@ import org.jspecify.annotations.NonNull;
 ///
 /// The player no longer moves or turns.
 @SuppressWarnings("unused")
-public class FreeCameraPerspective extends AbstractPerspective {
+public class FreeCameraPerspective implements Perspective {
   public static final FreeCameraPerspective INSTANCE = new FreeCameraPerspective();
 
   public static final Identifier ID = Bridge.createIdentifier("example", "free_camera");
 
   private static final float ROLL_SPEED = 90.0f;
 
-  private long lastTickNanos = System.nanoTime();
+  private double lastTickSeconds;
+
+  public final Vector3d position = new Vector3d();
+  public final Quaternionf rotation = new Quaternionf();
 
   @Override
   public @NonNull Identifier id() {
@@ -71,27 +76,46 @@ public class FreeCameraPerspective extends AbstractPerspective {
     rotation.mul(rollRot, rotation);
   }
 
+  private boolean needInit = true;
+
   @Override
   public void onActivate() {
-    alignWithPlayer();
+    needInit = true;
+  }
+
+  @Override
+  public void applyTransform(
+      @NonNull PerspectiveContext context,
+      @NonNull Vector3d position,
+      @NonNull Quaternionf rotation) {
+    if (needInit) {
+      this.position.set(position);
+      this.rotation.set(rotation);
+      needInit = false;
+    } else {
+      position.set(this.position);
+      rotation.set(this.rotation);
+    }
   }
 
   @Override
   public void renderTick(PerspectiveContext context) {
 
-    if (context.isTransitioning()) {
-      alignWithPlayer();
-    }
+    double now = GLFW.glfwGetTime();
+    float deltaTime = (float) (now - lastTickSeconds);
+    lastTickSeconds = now;
 
-    float deltaTime = (System.nanoTime() - lastTickNanos) / 1_000_000_000f;
-    lastTickNanos = System.nanoTime();
+    if (context.isTransitioning()) return;
+
+    // cannot use Math.clamp below java 21
+    deltaTime = Math.max(Math.min(deltaTime, 0.1f), 0.0001f);
 
     var minecraft = Minecraft.getInstance();
     if (minecraft == null) return;
 
     var options = minecraft.options;
     if (options != null) {
-      float moveMultiplier = deltaTime * 10f;
+      float moveMultiplier = deltaTime * 10;
 
       if (options.keyUp.isDown()) {
         applyMove(PerspectiveHelper.FORWARD, moveMultiplier);
@@ -119,18 +143,5 @@ public class FreeCameraPerspective extends AbstractPerspective {
         roll(ROLL_SPEED * deltaTime);
       }
     }
-  }
-
-  private void alignWithPlayer() {
-    var minecraft = Minecraft.getInstance();
-    if (minecraft == null) return;
-
-    var player = minecraft.player;
-    if (player == null) return;
-
-    Vec3 pos = player.getEyePosition(1);
-    position.set(pos.x, pos.y + 1, pos.z);
-
-    PerspectiveHelper.eulerDegToQuat(player.getRotationVector(), rotation);
   }
 }

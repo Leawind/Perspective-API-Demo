@@ -1,6 +1,7 @@
 package com.example.internal.impl;
 
 import com.example.internal.utils.ExpSmoothDouble;
+import io.github.leawind.perspectiveapi.api.Perspective;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
@@ -9,17 +10,21 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 /// - camera orbits around the player and always faces it.
 /// - Mouse movement only rotates the camera, not the player.
 @SuppressWarnings("unused")
-public class FreeThirdPersonPerspective extends AbstractPerspective {
+public class FreeThirdPersonPerspective implements Perspective {
   public static final FreeThirdPersonPerspective INSTANCE = new FreeThirdPersonPerspective();
 
   public static final Identifier ID = Bridge.createIdentifier("example", "free_third_person");
+  public final Vector3d position = new Vector3d();
+  public final Quaternionf rotation = new Quaternionf();
 
   private final Vector2f eulerDeg = new Vector2f();
 
@@ -100,5 +105,12 @@ public class FreeThirdPersonPerspective extends AbstractPerspective {
   @Override
   public float applyFov(@NonNull PerspectiveContext ctx, float vanillaFovDeg) {
     return getFieldOfViewValue();
+  }
+
+  @Override
+  public void applyTransform(
+      @NonNull PerspectiveContext ctx, @NonNull Vector3d position, @NonNull Quaternionf rotation) {
+    position.set(this.position);
+    rotation.set(this.rotation);
   }
 }
