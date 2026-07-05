@@ -1,6 +1,7 @@
 import gg.meza.stonecraft.mod
 import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.util.internal.VersionNumber
+import java.lang.System
 
 plugins {
     id("gg.meza.stonecraft")
@@ -178,4 +179,24 @@ loom {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+
+publishMods {
+    dryRun = false
+    modrinth {
+        // Somehow in 1.20.1-fabric, it fails if not specified
+        // refer to https://github.com/Leawind/Perspective-API/actions/runs/28410673256/job/84182772569
+        projectId = System.getProperty("MODRINTH_ID")
+        environment = CLIENT_ONLY
+
+        requires("perspective_api")
+    }
+    curseforge {
+        projectId = System.getProperty("CURSEFORGE_ID")
+        client = true
+        server = false
+
+        requires("perspective_api")
+    }
 }

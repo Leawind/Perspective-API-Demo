@@ -13,20 +13,24 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Setup JDK 25
+        uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      - uses: gradle/actions/setup-gradle@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Publish
-        run: ./gradlew build
-
-      - name: Upload jars to GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: versions/*/build/libs/*.jar
+      - name: Build & Publish
+        run: ./gradlew chiseledBuildAndCollect chiseledPublishMods --stacktrace
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_ID: ${{ vars.MODRINTH_ID }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          CURSEFORGE_ID: ${{ vars.CURSEFORGE_ID }}
+          CURSEFORGE_SLUG: ${{ vars.CURSEFORGE_SLUG }}
