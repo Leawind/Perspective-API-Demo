@@ -1,4 +1,4 @@
-package io.github.leawind.perspectiveapi.demo.internal.impl;
+package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 
 import io.github.leawind.perspectiveapi.api.Perspective;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;

@@ -1,4 +1,4 @@
-package io.github.leawind.perspectiveapi.demo.internal.impl;
+package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 
 import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveManager;
