@@ -13,9 +13,9 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 public class SimpleThirdPersonPerspective implements Perspective {
+  public static final Identifier ID = Bridge.createIdentifier("example", "simple_third_person");
   public static final SimpleThirdPersonPerspective INSTANCE = new SimpleThirdPersonPerspective();
 
-  public static final Identifier ID = Bridge.createIdentifier("example", "simple_third_person");
   public final Vector3d position = new Vector3d();
   public final Quaternionf rotation = new Quaternionf();
 

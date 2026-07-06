@@ -20,9 +20,9 @@ import org.jspecify.annotations.NonNull;
 /// - Mouse movement only rotates the camera, not the player.
 @SuppressWarnings("unused")
 public class FreeThirdPersonPerspective implements Perspective {
+  public static final Identifier ID = Bridge.createIdentifier("example", "free_third_person");
   public static final FreeThirdPersonPerspective INSTANCE = new FreeThirdPersonPerspective();
 
-  public static final Identifier ID = Bridge.createIdentifier("example", "free_third_person");
   public final Vector3d position = new Vector3d();
   public final Quaternionf rotation = new Quaternionf();
 

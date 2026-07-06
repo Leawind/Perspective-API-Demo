@@ -24,9 +24,8 @@ import org.lwjgl.glfw.GLFW;
 /// The player no longer moves or turns.
 @SuppressWarnings("unused")
 public class FreeCameraPerspective implements Perspective {
-  public static final FreeCameraPerspective INSTANCE = new FreeCameraPerspective();
-
   public static final Identifier ID = Bridge.createIdentifier("example", "free_camera");
+  public static final FreeCameraPerspective INSTANCE = new FreeCameraPerspective();
 
   private static final float ROLL_SPEED = 90.0f;
 
