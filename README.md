@@ -1,11 +1,19 @@
-| [中文](README.zh.md) | English |
-| :------------------: | :-----: |
+<div align="center">
 
-# Perspective API Demo
+<img src="src/main/resources/logo.128x.png" alt="Perspective API Demo" style="image-rendering:pixelated;height:8em;">
 
-This mod implements several simple custom perspectives based on the [Perspective API](https://github.com/Leawind/Perspective-API). If you are developing a mod that involves custom perspective functionality, you may refer to the code in this mod. This mod is not intended for actual gameplay, so its features are not perfect—for example, in free camera mode, you can still break/place blocks with the mouse. This is not considered a bug.
+# 视角 API 演示 (Perspective API Demo)
 
-## Features
+[中文](README.zh.md) | English
+
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/cA3rwRVH?style=flat&logo=modrinth&color=17B85A&cacheSeconds=3600&label=Modrinth)](https://modrinth.com/mod/perspective-api-demo)
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1579305?style=flat&logo=curseforge&color=F1643%5E&cacheSeconds=3600&label=CurseForge)](https://www.curseforge.com/minecraft/mc-mods/perspective-api-demo)
+
+A Minecraft mod that implements some simple features based on the [Perspective API](https://github.com/Leawind/Perspective-API).
+
+</div>
+
+## Perspectives
 
 This mod adds the following custom perspectives:
 
@@ -23,8 +31,12 @@ Additionally, the mouse scroll wheel adjusts both the camera-to-player distance 
 
 The camera detaches from the player entity and can be controlled independently:
 
+- Mouse movement controls camera rotation
 - Movement keys control camera movement
 - Space / Sneak move the camera up / down
 - Drop / Inventory keys roll the camera (rotate around the view axis)
 
 All movements are based on the camera's local reference frame, not the world reference frame.
+
+> [!TIP]
+> This mod is not intended for actual gameplay, so its features are not perfect—for example, in free camera mode, you can still break/place blocks with the mouse. This is not considered a bug.
