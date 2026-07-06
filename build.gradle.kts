@@ -1,7 +1,6 @@
 import gg.meza.stonecraft.mod
 import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.util.internal.VersionNumber
-import java.lang.System
 
 plugins {
     id("gg.meza.stonecraft")
@@ -11,8 +10,11 @@ val props: Map<String, Any> = project.properties.mapNotNull { (key, value) -> va
 
 val archivesBaseName = mod.id
 val archivesVersion = "${mod.version}-mc${mod.minecraftVersion}-${mod.loader}"
-
 tasks.withType<Jar>().configureEach {
+    archiveBaseName.set(archivesBaseName)
+    archiveVersion.set(archivesVersion)
+}
+tasks.withType<RemapJarTask>().configureEach {
     archiveBaseName.set(archivesBaseName)
     archiveVersion.set(archivesVersion)
 }
@@ -141,11 +143,6 @@ dependencies {
     compileOnly("com.google.auto.service:auto-service-annotations:1.1.1")
     annotationProcessor("com.google.auto.service:auto-service:1.1.1")
     // endregion
-}
-
-tasks.withType<RemapJarTask>().matching { it.name == "remapJar" }.configureEach {
-    archiveBaseName.set(archivesBaseName)
-    archiveVersion.set(archivesVersion)
 }
 
 if (mod.isFabric) {
