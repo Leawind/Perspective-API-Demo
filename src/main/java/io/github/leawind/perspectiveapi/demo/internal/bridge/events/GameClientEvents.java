@@ -1,5 +1,6 @@
 package io.github.leawind.perspectiveapi.demo.internal.bridge.events;
 
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.context.ExplosionContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.context.MouseTurnPlayerContext;
 import io.github.leawind.perspectiveapi.internal.utils.event.SimpleEventEmitter;
 import net.minecraft.client.Minecraft;
@@ -7,6 +8,9 @@ import org.joml.Vector2f;
 
 public final class GameClientEvents {
   private GameClientEvents() {}
+
+  public static final SimpleEventEmitter.Owned<ExplosionContext> EXPLOSION =
+      SimpleEventEmitter.create();
 
   public static final SimpleEventEmitter.Owned<MouseTurnPlayerContext> MOUSE_TURN_PLAYER =
       SimpleEventEmitter.create();

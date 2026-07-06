@@ -3,6 +3,7 @@ package io.github.leawind.perspectiveapi.demo.internal.logic;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
+import io.github.leawind.perspectiveapi.demo.internal.logic.modifiers.ExplosionShakeState;
 import io.github.leawind.perspectiveapi.demo.internal.logic.perspectives.FreeCameraPerspective;
 import io.github.leawind.perspectiveapi.demo.internal.logic.perspectives.FreeThirdPersonPerspective;
 import net.minecraft.client.Minecraft;
@@ -18,6 +19,9 @@ public final class ModEvents {
 
   public static void register() {
     var manager = PerspectiveAPI.getManager();
+
+    GameClientEvents.EXPLOSION.on(
+        ctx -> ExplosionShakeState.INSTANCE.addEvent(ctx.center(), ctx.radius()));
 
     GameClientEvents.MOUSE_TURN_PLAYER.on(
         e -> {
