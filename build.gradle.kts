@@ -135,7 +135,8 @@ dependencies {
     if (!perspectiveApiDir.isNullOrBlank()) {
         modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT+${mod.loader}-${mod.minecraftVersion}")
     } else {
-//        modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+        // modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+        // Somehow if I use slug like above, it does not download sources jar. So better use project id like below:
         modImplAlias("maven.modrinth:LIqveQm1:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
     }
 

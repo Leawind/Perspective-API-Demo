@@ -1,7 +1,8 @@
 package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 
 import com.google.auto.service.AutoService;
-import io.github.leawind.perspectiveapi.api.PerspectiveManager;
+import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
+import io.github.leawind.perspectiveapi.api.PerspectiveRegistry;
 import io.github.leawind.perspectiveapi.api.spi.PerspectiveRegistrar;
 import io.github.leawind.perspectiveapi.demo.internal.logic.modifiers.ExplosionShakeModifier;
 
@@ -10,18 +11,16 @@ import io.github.leawind.perspectiveapi.demo.internal.logic.modifiers.ExplosionS
 public class ExamplePerspectiveRegistrar implements PerspectiveRegistrar {
 
   @Override
-  public void register(PerspectiveManager manager) {
-    manager.registry().register(SimpleThirdPersonPerspective.INSTANCE);
-    manager.registry().register(FreeThirdPersonPerspective.INSTANCE);
-    manager.registry().register(FreeCameraPerspective.INSTANCE);
+  public void register(PerspectiveRegistry registry) {
+    registry.register(SimpleThirdPersonPerspective.INSTANCE);
+    registry.register(FreeThirdPersonPerspective.INSTANCE);
+    registry.register(FreeCameraPerspective.INSTANCE);
 
-    manager.cycler().add(SimpleThirdPersonPerspective.ID, 110);
-    manager.cycler().add(FreeThirdPersonPerspective.ID, 120);
-    manager.cycler().add(FreeCameraPerspective.ID, 130);
+    PerspectiveAPI.getWheel().register(SimpleThirdPersonPerspective.ID, 110);
+    PerspectiveAPI.getWheel().register(FreeThirdPersonPerspective.ID, 120);
+    PerspectiveAPI.getWheel().register(FreeCameraPerspective.ID, 130);
 
-    manager
-        .modifiers()
-        .register(
-            ExplosionShakeModifier.ID, Integer.MAX_VALUE, new ExplosionShakeModifier());
+    PerspectiveAPI.getModifierChain()
+        .register(ExplosionShakeModifier.ID, Integer.MAX_VALUE, new ExplosionShakeModifier());
   }
 }
