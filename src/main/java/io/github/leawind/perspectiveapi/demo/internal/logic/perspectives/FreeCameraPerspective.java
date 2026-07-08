@@ -98,7 +98,7 @@ public class FreeCameraPerspective implements Perspective {
   }
 
   @Override
-  public void renderTick(PerspectiveContext context) {
+  public void renderTickWhenActive(PerspectiveContext context) {
 
     double now = GLFW.glfwGetTime();
     float deltaTime = (float) (now - lastTickSeconds);

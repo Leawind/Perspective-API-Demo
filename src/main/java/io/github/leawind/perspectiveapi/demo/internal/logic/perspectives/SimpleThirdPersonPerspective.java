@@ -30,7 +30,7 @@ public class SimpleThirdPersonPerspective implements Perspective {
   }
 
   @Override
-  public void renderTick(PerspectiveContext context) {
+  public void renderTickWhenActive(PerspectiveContext context) {
     Entity entity = context.entity();
     if (entity == null) {
       return;

@@ -9,7 +9,7 @@ plugins {
 val props: Map<String, Any> = project.properties.mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
 
 val archivesBaseName = mod.id
-val archivesVersion = "${mod.version}-mc${mod.minecraftVersion}-${mod.loader}"
+val archivesVersion = "${mod.version}+${mod.loader}-${mod.minecraftVersion}"
 tasks.withType<Jar>().configureEach {
     archiveBaseName.set(archivesBaseName)
     archiveVersion.set(archivesVersion)
@@ -113,10 +113,12 @@ fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
 
 dependencies {
     val perspectiveApiDir = System.getenv("PERSPECTIVE_API_DIR") ?: System.getProperty("PERSPECTIVE_API_DIR")
+
     if (!perspectiveApiDir.isNullOrBlank()) {
         modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT-mc${mod.minecraftVersion}-${mod.loader}")
     } else {
-        modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+//        modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
+        modImplAlias("maven.modrinth:LIqveQm1:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
     }
 
     if (mod.isFabric) {

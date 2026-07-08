@@ -69,14 +69,14 @@ public class FreeThirdPersonPerspective implements Perspective {
   }
 
   @Override
-  public void clientTick(Minecraft minecraft) {
+  public void clientTickWhenActive(Minecraft minecraft) {
     Entity entity = minecraft.getCameraEntity();
     if (entity == null) return;
     frustumHalfHeight = getFrustumHalfHeight(4 * entity.getBoundingBox().getSize(), 70.0f);
   }
 
   @Override
-  public void renderTick(PerspectiveContext context) {
+  public void renderTickWhenActive(PerspectiveContext context) {
     Entity entity = context.entity();
     if (entity == null) return;
 
