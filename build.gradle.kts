@@ -62,6 +62,7 @@ stonecutter {
     }
 }
 
+val perspectiveApiDir = System.getenv("PERSPECTIVE_API_DIR") ?: System.getProperty("PERSPECTIVE_API_DIR")
 
 repositories {
     mavenLocal()
@@ -101,6 +102,23 @@ repositories {
         name = "Nucleoid"
         url = uri("https://maven.nucleoid.xyz")
     }
+    if (!perspectiveApiDir.isNullOrBlank()) {
+        // Yet Another Config Lib
+        maven("https://maven.isxander.dev/releases") {
+            name = "Xander Maven"
+        }
+        // Modern UI
+        maven("https://maven.izzel.io/releases/") {
+            name = "Modern UI"
+        }
+        // Forge Config API Port
+        maven {
+            url = uri("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/")
+            content {
+                includeGroup("fuzs.forgeconfigapiport")
+            }
+        }
+    }
 }
 
 fun DependencyHandlerScope.modImplAlias(dependencyNotation: String) {
@@ -115,7 +133,7 @@ dependencies {
     val perspectiveApiDir = System.getenv("PERSPECTIVE_API_DIR") ?: System.getProperty("PERSPECTIVE_API_DIR")
 
     if (!perspectiveApiDir.isNullOrBlank()) {
-        modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT-mc${mod.minecraftVersion}-${mod.loader}")
+        modImplAlias("io.github.leawind.perspectiveapi:perspective_api:0.0-SNAPSHOT+${mod.loader}-${mod.minecraftVersion}")
     } else {
 //        modImplAlias("maven.modrinth:perspective-api:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
         modImplAlias("maven.modrinth:LIqveQm1:${props["mod.perspective_api_version"]}+${mod.loader}-${mod.minecraftVersion}")
