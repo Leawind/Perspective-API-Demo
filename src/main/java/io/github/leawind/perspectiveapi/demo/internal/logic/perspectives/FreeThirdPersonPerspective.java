@@ -1,13 +1,14 @@
 package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 
-import io.github.leawind.perspectiveapi.api.Perspective;
-import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
+import com.google.auto.service.AutoService;
+import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
+import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
+import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
 import io.github.leawind.perspectiveapi.demo.internal.utils.ExpSmoothDouble;
-import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Quaternionf;
@@ -18,10 +19,15 @@ import org.jspecify.annotations.NonNull;
 
 /// - camera orbits around the player and always faces it.
 /// - Mouse movement only rotates the camera, not the player.
+@AutoService(PerspectiveBehavior.class)
+@PerspectiveBehavior.Info(
+    id = FreeThirdPersonPerspective.ID,
+    priority = 10,
+    nameKey = "perspective.perspective_api_demo.free_third_person.name",
+    cameraType = CameraType.THIRD_PERSON_BACK)
 @SuppressWarnings("unused")
-public class FreeThirdPersonPerspective implements Perspective {
-  public static final Identifier ID = Bridge.createIdentifier("example", "free_third_person");
-  public static final FreeThirdPersonPerspective INSTANCE = new FreeThirdPersonPerspective();
+public class FreeThirdPersonPerspective implements PerspectiveBehavior {
+  public static final String ID = "perspective_api_demo.free_third_person";
 
   public final Vector3d position = new Vector3d();
   public final Quaternionf rotation = new Quaternionf();
@@ -48,19 +54,65 @@ public class FreeThirdPersonPerspective implements Perspective {
 
   private boolean needInit = true;
 
-  @Override
-  public @NonNull Identifier id() {
-    return ID;
-  }
-
-  @Override
-  public @NonNull CameraType cameraType() {
-    return CameraType.THIRD_PERSON_BACK;
-  }
-
   public void rotate(float deltaYaw, float deltaPitch) {
     eulerDeg.y += deltaYaw;
     eulerDeg.x = Math.max(-90f, Math.min(90f, eulerDeg.x + deltaPitch));
+  }
+
+  @Override
+  public void init() {
+
+    GameClientEvents.MOUSE_TURN_PLAYER.on(
+        e -> {
+          if (PerspectiveAPI.isCurrent(ID)) {
+            rotate((float) e.dx * 0.15f, (float) e.dy * 0.15f);
+            e.cancelDefault = true;
+          }
+        });
+
+    GameClientEvents.MOUSE_SCROLL.on(
+        ctx -> {
+          if (Minecraft.getInstance().isPaused()) return;
+          if (PerspectiveAPI.isCurrent(ID)) {
+            float factor = (float) Math.pow(1.1487, -ctx.yOffset);
+            smoothFovHalfTan.setTarget(smoothFovHalfTan.getTarget() * factor);
+            ctx.cancelDefault = true;
+          }
+        });
+
+    GameClientEvents.TICK_KEYBOARD_INPUT.on(
+        impulse -> {
+          if (PerspectiveAPI.isCurrent(ID)) {
+            var minecraft = Minecraft.getInstance();
+            if (minecraft == null) return;
+            var player = minecraft.player;
+            if (player == null) return;
+
+            Vec2 playerRotVec = player.getRotationVector();
+            Quaternionf playerRotation =
+                PerspectiveMath.eulerDegToQuat(
+                    new Vector2f(playerRotVec.x, playerRotVec.y), new Quaternionf());
+
+            var moveVector = new Vector3f(-impulse.x, 0, -impulse.y);
+
+            {
+              rotation.transform(moveVector, moveVector);
+              playerRotation.transformInverse(moveVector, moveVector);
+            }
+
+            {
+              var movement = player.getDeltaMovement();
+              if (movement.lengthSqr() > 0.01f) {
+                var orientation =
+                    PerspectiveMath.directionToEulerDeg(movement.toVector3f(), new Vector2f());
+                player.setYRot(orientation.y);
+              }
+            }
+
+            impulse.x = -moveVector.x;
+            impulse.y = -moveVector.z;
+          }
+        });
   }
 
   @Override
@@ -88,8 +140,8 @@ public class FreeThirdPersonPerspective implements Perspective {
       needInit = false;
     }
 
-    PerspectiveHelper.eulerDegToQuat(eulerDeg, rotation);
-    var backward = PerspectiveHelper.getBackwardVector(rotation, new Vector3f());
+    PerspectiveMath.eulerDegToQuat(eulerDeg, rotation);
+    var backward = PerspectiveMath.getBackward(rotation, new Vector3f());
     double now = System.currentTimeMillis();
     position.set(eyePos.x, eyePos.y, eyePos.z).add(backward.mul((float) getDistance(now)));
 
@@ -99,7 +151,7 @@ public class FreeThirdPersonPerspective implements Perspective {
             (float) (eyePos.y - position.y),
             (float) (eyePos.z - position.z));
 
-    PerspectiveHelper.viewVectorToQuat(viewVectorToEntity, rotation);
+    PerspectiveMath.directionToQuat(viewVectorToEntity, rotation);
   }
 
   @Override

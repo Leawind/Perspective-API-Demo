@@ -1,0 +1,7 @@
+{
+  "modmenu.nameTranslation.perspective_api_demo": "Perspective API Demo",
+  "modmenu.descriptionTranslation.perspective_api_demo": "Implements some simple features based on the [Perspective API](https://github.com/Leawind/Perspective-API)",
+  "perspective.perspective_api_demo.simple_third_person.name": "Simple Third Person",
+  "perspective.perspective_api_demo.free_camera.name": "Free Camera",
+  "perspective.perspective_api_demo.free_third_person.name": "Free Third Person"
+}

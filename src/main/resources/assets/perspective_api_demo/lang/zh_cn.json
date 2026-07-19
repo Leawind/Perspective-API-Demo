@@ -1,0 +1,7 @@
+{
+  "modmenu.nameTranslation.perspective_api": "视角 API 演示",
+  "modmenu.descriptionTranslation.perspective_api": "基于[视角 API](https://github.com/Leawind/Perspective-API)实现了一些简单的功能。",
+  "perspective.perspective_api_demo.simple_third_person.name": "简单第三人称",
+  "perspective.perspective_api_demo.free_camera.name": "自由相机",
+  "perspective.perspective_api_demo.free_third_person.name": "自由第三人称"
+}

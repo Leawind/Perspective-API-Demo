@@ -1,33 +1,29 @@
 package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 
-import io.github.leawind.perspectiveapi.api.Perspective;
-import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
+import com.google.auto.service.AutoService;
+import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
+import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
-import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
 import net.minecraft.client.CameraType;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec2;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
-public class SimpleThirdPersonPerspective implements Perspective {
-  public static final Identifier ID = Bridge.createIdentifier("example", "simple_third_person");
-  public static final SimpleThirdPersonPerspective INSTANCE = new SimpleThirdPersonPerspective();
+@AutoService(PerspectiveBehavior.class)
+@PerspectiveBehavior.Info(
+    id = "perspective_api_demo.simple_third_person",
+    priority = 10,
+    nameKey = "perspective.perspective_api_demo.simple_third_person.name",
+    cameraType = CameraType.THIRD_PERSON_BACK)
+@SuppressWarnings("unused")
+public class SimpleThirdPersonPerspective implements PerspectiveBehavior {
 
   public final Vector3d position = new Vector3d();
   public final Quaternionf rotation = new Quaternionf();
-
-  @Override
-  public @NonNull Identifier id() {
-    return ID;
-  }
-
-  @Override
-  public @NonNull CameraType cameraType() {
-    return CameraType.THIRD_PERSON_BACK;
-  }
 
   @Override
   public void renderTickWhenActive(PerspectiveContext context) {
@@ -36,10 +32,11 @@ public class SimpleThirdPersonPerspective implements Perspective {
       return;
     }
 
-    PerspectiveHelper.eulerDegToQuat(entity.getRotationVector(), rotation);
+    Vec2 rotVec = entity.getRotationVector();
+    PerspectiveMath.eulerDegToQuat(new Vector2f(rotVec.x, rotVec.y), rotation);
 
-    var backward = PerspectiveHelper.getBackwardVector(rotation, new Vector3f());
-    var right = PerspectiveHelper.getRightVector(rotation, new Vector3f());
+    var backward = PerspectiveMath.getBackward(rotation, new Vector3f());
+    var right = PerspectiveMath.getRight(rotation, new Vector3f());
     var pos = entity.getEyePosition(context.partialTicks());
     position.set(pos.x, pos.y + 1, pos.z).add(backward.mul(2.5f)).add(right.mul(1));
   }

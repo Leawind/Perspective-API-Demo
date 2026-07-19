@@ -1,10 +1,8 @@
 package io.github.leawind.perspectiveapi.demo.internal.logic.modifiers;
 
-import io.github.leawind.perspectiveapi.api.PerspectiveHelper;
+import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveModifier;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
-import io.github.leawind.perspectiveapi.internal.bridge.Bridge;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
@@ -16,8 +14,7 @@ import org.lwjgl.glfw.GLFW;
 /// /execute at @p run summon minecraft:creeper ~ ~ ~ {ignited:1b,Fuse:0s,ExplosionRadius:13b}
 /// ```
 public class ExplosionShakeModifier implements PerspectiveModifier {
-  public static final Identifier ID =
-      Bridge.createIdentifier("perspective_api_demo", "explosion_shake");
+  public static final String ID = "perspective_api_demo.explosion_shake";
 
   private static final double MAX_SHAKE_DEGREES = 45;
 
@@ -35,7 +32,7 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
   private static final double PHASE_3 = 4.2;
 
   @Override
-  public @NonNull Identifier id() {
+  public @NonNull String id() {
     return ID;
   }
 
@@ -75,12 +72,12 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
     double rollShake = shakeIntensity * s1 * s3;
 
     Quaternionf yawRot =
-        new Quaternionf().rotationAxis((float) Math.toRadians(yawShake), PerspectiveHelper.DOWN);
+        new Quaternionf().rotationAxis((float) Math.toRadians(yawShake), PerspectiveMath.DOWN);
     Quaternionf pitchRot =
-        new Quaternionf().rotationAxis((float) Math.toRadians(pitchShake), PerspectiveHelper.RIGHT);
+        new Quaternionf().rotationAxis((float) Math.toRadians(pitchShake), PerspectiveMath.RIGHT);
     Quaternionf rollRot =
         new Quaternionf()
-            .rotationAxis((float) Math.toRadians(rollShake), PerspectiveHelper.FORWARD);
+            .rotationAxis((float) Math.toRadians(rollShake), PerspectiveMath.FORWARD);
     rotation.mul(pitchRot, rotation).mul(yawRot, rotation).mul(rollRot, rotation);
   }
 
