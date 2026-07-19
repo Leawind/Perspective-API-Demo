@@ -20,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 /// - Keyboard controls movement
 /// - mouse controls rotation
 /// - Q/E roll
-/// - scroll wheel controls FOV
+/// - scroll wheel controls movement speed
 ///
 /// The player no longer moves or turns.
 @AutoService(PerspectiveBehavior.class)
@@ -34,8 +34,10 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
   public static final String ID = "perspective_api_demo.free_camera";
 
   private static final float ROLL_SPEED = 90.0f;
+  private static final float BASE_SPEED = 10.0f;
 
   private double lastTickSeconds;
+  private float speedFactor = 0.0f;
 
   private boolean needInit = true;
   public final Vector3d position = new Vector3d();
@@ -77,6 +79,14 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
           if (PerspectiveAPI.isCurrent(ID)) {
             rotate((float) e.dx * 0.15f, (float) e.dy * 0.15f);
             e.cancelDefault = true;
+          }
+        });
+    GameClientEvents.MOUSE_SCROLL.on(
+        ctx -> {
+          if (Minecraft.getInstance().isPaused()) return;
+          if (PerspectiveAPI.isCurrent(ID)) {
+            speedFactor += (float) ctx.yOffset * 0.5f;
+            ctx.cancelDefault = true;
           }
         });
     GameClientEvents.TICK_KEYBOARD_INPUT.on(
@@ -139,7 +149,7 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
 
     var options = minecraft.options;
     if (options != null) {
-      float moveMultiplier = deltaTime * 10;
+      float moveMultiplier = deltaTime * BASE_SPEED * (float) Math.pow(2, speedFactor);
 
       if (options.keyUp.isDown()) {
         applyMove(PerspectiveMath.FORWARD, moveMultiplier);
