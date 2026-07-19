@@ -208,13 +208,13 @@ publishMods {
         projectId = System.getenv("MODRINTH_ID")
         environment = CLIENT_ONLY
 
-        requires("perspective_api")
+        requires("perspective-api")
     }
     curseforge {
         projectId = System.getenv("CURSEFORGE_ID")
         client = true
         server = false
 
-        requires("perspective_api")
+        requires("perspective-api")
     }
 }
