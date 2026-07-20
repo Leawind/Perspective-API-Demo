@@ -30,6 +30,6 @@ side = "CLIENT"
 [[dependencies.${ id }]]
 modId = "perspective_api"
 mandatory = true
-versionRange = "[${perspective_api_version},)"
+versionRange = "*"
 ordering = "NONE"
 side = "CLIENT"
