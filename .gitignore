@@ -27,7 +27,6 @@ build/
 # other
 bin/
 run/
-.architectury-transformer/
 *.log
 *.log.gz
 
@@ -60,5 +59,6 @@ forge*changelog.txt
 AGENTS.md
 AGENTS-*.md
 
-# stonecraft
-/versions/*-*/
+# stonecutter
+/versions/*-*/*
+!/versions/*-*/gradle.properties

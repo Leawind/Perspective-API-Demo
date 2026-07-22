@@ -7,7 +7,6 @@ import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
 import io.github.leawind.perspectiveapi.demo.internal.utils.ExpSmoothDouble;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
@@ -24,7 +23,7 @@ import org.jspecify.annotations.NonNull;
     id = FreeThirdPersonPerspective.ID,
     priority = 10,
     nameKey = "perspective.perspective_api_demo.free_third_person.name",
-    cameraType = CameraType.THIRD_PERSON_BACK)
+    baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)
 @SuppressWarnings("unused")
 public class FreeThirdPersonPerspective implements PerspectiveBehavior {
   public static final String ID = "perspective_api_demo.free_third_person";

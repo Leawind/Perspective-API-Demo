@@ -6,7 +6,6 @@ import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -28,7 +27,7 @@ import org.lwjgl.glfw.GLFW;
     id = FreeCameraPerspective.ID,
     priority = 10,
     nameKey = "perspective.perspective_api_demo.free_camera.name",
-    cameraType = CameraType.THIRD_PERSON_BACK)
+    baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)
 @SuppressWarnings("unused")
 public class FreeCameraPerspective implements PerspectiveBehavior {
   public static final String ID = "perspective_api_demo.free_camera";

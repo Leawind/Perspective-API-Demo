@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
-import net.minecraft.client.CameraType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Quaternionf;
@@ -18,7 +17,7 @@ import org.jspecify.annotations.NonNull;
     id = "perspective_api_demo.simple_third_person",
     priority = 10,
     nameKey = "perspective.perspective_api_demo.simple_third_person.name",
-    cameraType = CameraType.THIRD_PERSON_BACK)
+    baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)
 @SuppressWarnings("unused")
 public class SimpleThirdPersonPerspective implements PerspectiveBehavior {
 

@@ -26,7 +26,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build & Publish
-        run: ./gradlew chiseledBuildAndCollect chiseledPublishMods --stacktrace
+        run: ./gradlew buildAndCollect publishMods --stacktrace
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
