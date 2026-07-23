@@ -28,6 +28,7 @@ jobs:
       - name: Build & Publish
         run: ./gradlew buildAndCollect publishMods --stacktrace
         env:
+          DRY_RUN: ${{ vars.DRY_RUN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           MODRINTH_ID: ${{ vars.MODRINTH_ID }}
