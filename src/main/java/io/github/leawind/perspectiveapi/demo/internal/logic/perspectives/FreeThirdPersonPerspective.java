@@ -156,7 +156,7 @@ public class FreeThirdPersonPerspective implements PerspectiveBehavior {
 
   @Override
   public void applyCameraState(
-      @NonNull PerspectiveContext ctx, PerspectiveState.@NonNull Mutable state) {
+      PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
     state.position().set(this.position);
     state.rotation().set(this.rotation);
     state.setFovDeg(getFieldOfViewValue());

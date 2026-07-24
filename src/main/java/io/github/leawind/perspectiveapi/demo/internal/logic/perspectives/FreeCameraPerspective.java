@@ -164,7 +164,7 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
 
   @Override
   public void applyCameraState(
-      @NonNull PerspectiveContext ctx, PerspectiveState.@NonNull Mutable state) {
+      PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
     if (needInit) {
       var eyePos = ctx.entity().getEyePosition(ctx.partialTicks());
       this.position.set(eyePos.x, eyePos.y, eyePos.z);
