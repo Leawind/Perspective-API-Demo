@@ -123,7 +123,7 @@ dependencies {
     if (!isFabric) {
         testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
     }
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
     testImplementation("com.google.jimfs:jimfs:1.3.0") {
         exclude(group = "com.google.guava", module = "guava")
     }
