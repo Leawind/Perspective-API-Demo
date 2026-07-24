@@ -1,5 +1,3 @@
-import org.gradle.language.jvm.tasks.ProcessResources
-
 plugins {
     id("dev.kikugie.stonecutter")
     id("dev.isxander.modstitch.base")
@@ -30,7 +28,16 @@ val supportsUnitTesting = isFabric || (isNeoforge && stonecutter.current.parsed 
 // ========== ModStitch Setup ==========
 modstitch {
     minecraftVersion = mcVersion
-
+    if (!isFabric) {
+        runs {
+            register("client") {
+                client()
+            }
+            register("server") {
+                server()
+            }
+        }
+    }
     loom {
         prop("deps.fabricLoader") { fabricLoaderVersion = it }
     }

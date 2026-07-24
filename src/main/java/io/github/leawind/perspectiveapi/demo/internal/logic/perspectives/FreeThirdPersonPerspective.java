@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
+import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
 import io.github.leawind.perspectiveapi.demo.internal.utils.ExpSmoothDouble;
@@ -127,7 +128,7 @@ public class FreeThirdPersonPerspective implements PerspectiveBehavior {
   }
 
   @Override
-  public void renderTickWhenActive(PerspectiveContext context) {
+  public void preApplyWhenActive(@NonNull PerspectiveContext context) {
     Entity entity = context.entity();
     if (entity == null) return;
 
@@ -154,14 +155,10 @@ public class FreeThirdPersonPerspective implements PerspectiveBehavior {
   }
 
   @Override
-  public float applyFov(@NonNull PerspectiveContext ctx, float vanillaFovDeg) {
-    return getFieldOfViewValue();
-  }
-
-  @Override
-  public void applyTransform(
-      @NonNull PerspectiveContext ctx, @NonNull Vector3d position, @NonNull Quaternionf rotation) {
-    position.set(this.position);
-    rotation.set(this.rotation);
+  public void applyCameraState(
+      @NonNull PerspectiveContext ctx, PerspectiveState.@NonNull Mutable state) {
+    state.position().set(this.position);
+    state.rotation().set(this.rotation);
+    state.setFovDeg(getFieldOfViewValue());
   }
 }

@@ -2,6 +2,7 @@ package io.github.leawind.perspectiveapi.demo.internal.logic.modifiers;
 
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveModifier;
+import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -37,8 +38,7 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
   }
 
   @Override
-  public void applyTransform(
-      @NonNull PerspectiveContext ctx, @NonNull Vector3d position, @NonNull Quaternionf rotation) {
+  public void apply(PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
     Entity entity = ctx.entity();
     if (entity == null) return;
 
@@ -46,7 +46,9 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
 
     double totalInfluence = 0.0;
     for (var event : ExplosionShakeState.INSTANCE.getActiveEvents()) {
-      double distance = new Vec3(position.x(), position.y(), position.z()).distanceTo(event.center);
+      double distance =
+          new Vec3(state.position().x(), state.position().y(), state.position().z())
+              .distanceTo(event.center);
       double deltaTime = now - event.time;
       double influence = getInfluence(event, distance, deltaTime);
 
@@ -76,9 +78,8 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
     Quaternionf pitchRot =
         new Quaternionf().rotationAxis((float) Math.toRadians(pitchShake), PerspectiveMath.RIGHT);
     Quaternionf rollRot =
-        new Quaternionf()
-            .rotationAxis((float) Math.toRadians(rollShake), PerspectiveMath.FORWARD);
-    rotation.mul(pitchRot, rotation).mul(yawRot, rotation).mul(rollRot, rotation);
+        new Quaternionf().rotationAxis((float) Math.toRadians(rollShake), PerspectiveMath.FORWARD);
+    state.rotation().mul(pitchRot, state.rotation()).mul(yawRot, state.rotation()).mul(rollRot, state.rotation());
   }
 
   private static double getInfluence(

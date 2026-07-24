@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
+import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
 import net.minecraft.client.Minecraft;
@@ -116,24 +117,7 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
   }
 
   @Override
-  public void applyTransform(
-      @NonNull PerspectiveContext context,
-      @NonNull Vector3d position,
-      @NonNull Quaternionf rotation) {
-    if (needInit) {
-      this.position.set(position);
-      this.rotation.set(rotation);
-      needInit = false;
-    } else {
-      position.set(this.position);
-      rotation.set(this.rotation);
-    }
-  }
-
-  @SuppressWarnings("ConstantConditions")
-  @Override
-  public void renderTickWhenActive(PerspectiveContext context) {
-
+  public void preApplyWhenActive(@NonNull PerspectiveContext context) {
     double now = GLFW.glfwGetTime();
     float deltaTime = (float) (now - lastTickSeconds);
     lastTickSeconds = now;
@@ -176,5 +160,18 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
         roll(ROLL_SPEED * deltaTime);
       }
     }
+  }
+
+  @Override
+  public void applyCameraState(
+      @NonNull PerspectiveContext ctx, PerspectiveState.@NonNull Mutable state) {
+    if (needInit) {
+      var eyePos = ctx.entity().getEyePosition(ctx.partialTicks());
+      this.position.set(eyePos.x, eyePos.y, eyePos.z);
+      this.rotation.set(state.rotation());
+      needInit = false;
+    }
+    state.position().set(this.position);
+    state.rotation().set(this.rotation);
   }
 }

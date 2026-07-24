@@ -3,6 +3,7 @@ package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
+import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
@@ -25,7 +26,7 @@ public class SimpleThirdPersonPerspective implements PerspectiveBehavior {
   public final Quaternionf rotation = new Quaternionf();
 
   @Override
-  public void renderTickWhenActive(PerspectiveContext context) {
+  public void preApplyWhenActive(@NonNull PerspectiveContext context) {
     Entity entity = context.entity();
     if (entity == null) {
       return;
@@ -41,9 +42,9 @@ public class SimpleThirdPersonPerspective implements PerspectiveBehavior {
   }
 
   @Override
-  public void applyTransform(
-      @NonNull PerspectiveContext ctx, @NonNull Vector3d position, @NonNull Quaternionf rotation) {
-    position.set(this.position);
-    rotation.set(this.rotation);
+  public void applyCameraState(
+      @NonNull PerspectiveContext ctx, PerspectiveState.@NonNull Mutable state) {
+    state.position().set(this.position);
+    state.rotation().set(this.rotation);
   }
 }
