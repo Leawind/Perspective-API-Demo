@@ -5,9 +5,20 @@ plugins {
     id("me.modmuss50.mod-publish-plugin")
 }
 
-// ========== Versions & Project Info ==========
+// region Versions & Project Info
 val mcVersion: String by project
-val modVersionString = property("mod.version")!!.toString()
+val modGroupValue = requiredProp("mod.group")
+val modIdValue = requiredProp("mod.id")
+val modVersionString = requiredProp("mod.version")
+val modNameValue = requiredProp("mod.name")
+val modDescriptionValue = requiredProp("mod.description")
+val modAuthorValue = requiredProp("mod.author")
+val modLicenseValue = requiredProp("mod.license")
+val modLogoFile = requiredProp("mod.logo_file")
+val modHomeUrl = requiredProp("mod.home_url")
+val modSourceUrl = requiredProp("mod.source_url")
+val modIssuesUrl = requiredProp("mod.issues_url")
+val modEmail = requiredProp("mod.email")
 
 val isFabric = modstitch.isLoom
 val isNeoforge = modstitch.isModDevGradleRegular
@@ -24,41 +35,62 @@ val loader = when {
 // - NeoForge: >= 1.20.5 (JUnit run type not available in older versions)
 // - Forge: not supported
 val supportsUnitTesting = isFabric || (isNeoforge && stonecutter.current.parsed >= "1.20.5")
+// endregion
 
-// ========== ModStitch Setup ==========
+// region ModStitch Setup
 modstitch {
     minecraftVersion = mcVersion
+
+    loom {
+        if (isFabric) {
+            fabricLoaderVersion = requiredProp("deps.fabricLoader")
+            configureLoom {
+                runs.named("client") {
+                    runDir = project.relativePath(rootProject.file("run"))
+                }
+            }
+        }
+    }
+
     if (!isFabric) {
         runs {
             register("client") {
                 client()
-            }
-            register("server") {
-                server()
+                gameDirectory.set(rootProject.layout.projectDirectory.dir("run"))
             }
         }
     }
-    loom {
-        prop("deps.fabricLoader") { fabricLoaderVersion = it }
-    }
 
     moddevgradle {
-        prop("deps.neoforge") { neoForgeVersion = it }
-        prop("deps.forge") { forgeVersion = it }
+        if (isNeoforge) {
+            neoForgeVersion = requiredProp("deps.neoforge")
+        }
+        if (isForge) {
+            forgeVersion = requiredProp("deps.forge")
+        }
     }
 
     metadata {
-        modId = "perspective_api_demo"
-        modName = "Perspective API Demo"
+        modId = modIdValue
+        modName = modNameValue
         modVersion = "$modVersionString+$loader-$mcVersion"
-        modGroup = "io.github.leawind.perspectiveapi.demo"
-        modDescription = "Demonstration for Perspective API"
-        modLicense = "MIT"
-        modAuthor = "Leawind"
+        modGroup = modGroupValue
+        modDescription = modDescriptionValue
+        modLicense = modLicenseValue
+        modAuthor = modAuthorValue
 
+        replacementProperties.put("logo_file", modLogoFile)
+        replacementProperties.put("home_url", modHomeUrl)
+        replacementProperties.put("source_url", modSourceUrl)
+        replacementProperties.put("issues_url", modIssuesUrl)
+        replacementProperties.put("email", modEmail)
         replacementProperties.put("github", "Leawind/Perspective-API-Demo")
-        replacementProperties.put("mc", "*")
-        replacementProperties.put("loaderVersion", "*")
+        replacementProperties.put("mc", requiredProp("meta.mcDep"))
+        if (isNeoforge) {
+            replacementProperties.put("loaderVersion", requiredProp("meta.loaderDep"))
+        } else if (isForge) {
+            replacementProperties.put("loaderVersion", "*")
+        }
     }
 
     mixin {
@@ -74,8 +106,9 @@ modstitch {
         unitTesting()
     }
 }
+// endregion
 
-// ========== Stonecutter ==========
+// region Stonecutter
 stonecutter {
     constants {
         put("fabric", isFabric)
@@ -83,26 +116,34 @@ stonecutter {
         put("forge", isForge)
     }
 
-    // ResourceLocation -> Identifier
     replacements.string(current.parsed >= "1.21.11") {
         replace("net.minecraft.resources.ResourceLocation", "net.minecraft.resources.Identifier")
         replace("ResourceLocation", "Identifier")
     }
-    // Input -> ClientInput
+
     replacements.string(current.parsed > "1.21") {
         replace(
             "net.minecraft.client.player.Input",
-            "net.minecraft.client.player.ClientInput"
+            "net.minecraft.client.player.ClientInput",
         )
     }
-}
 
-// ========== Dependencies ==========
-// Force specific log4j version to avoid dynamic version resolution issues in offline mode
-configurations.all {
-    resolutionStrategy {
-        force("org.apache.logging.log4j:log4j-api:2.24.3")
-        force("org.apache.logging.log4j:log4j-core:2.24.3")
+    replacements.string(current.parsed >= "26.1") {
+        replace("net.minecraft.client.gui.GuiGraphics", "net.minecraft.client.gui.GuiGraphicsExtractor")
+        replace("GuiGraphics", "GuiGraphicsExtractor")
+    }
+}
+// endregion
+
+// region Dependencies
+
+// The transitive `net.minecraftforge:unsafe` dependency uses the dynamic version `2.11.+`.
+if (isForge || (isNeoforge && stonecutter.current.parsed < "1.21")) {
+    configurations.configureEach {
+        resolutionStrategy {
+            force("org.apache.logging.log4j:log4j-api:2.24.3")
+            force("org.apache.logging.log4j:log4j-core:2.24.3")
+        }
     }
 }
 
@@ -115,8 +156,14 @@ dependencies {
         modstitchModImplementation("maven.modrinth:LIqveQm1:${property("mod.perspective_api_version")}+${loader}-$mcVersion")
     }
 
-    prop("deps.fabricApi") { modstitchModImplementation("net.fabricmc.fabric-api:fabric-api:$it") }
-    prop("mod.modmenu_version") { modstitchModImplementation("com.terraformersmc:modmenu:$it") }
+    if (isFabric) {
+        modstitchModImplementation(
+            "net.fabricmc.fabric-api:fabric-api:${requiredProp("deps.fabricApi")}",
+        )
+        modstitchModImplementation(
+            "com.terraformersmc:modmenu:${requiredProp("mod.modmenu_version")}",
+        )
+    }
 
     // Compile only
     compileOnly("org.jspecify:jspecify:1.0.0")
@@ -128,20 +175,27 @@ dependencies {
     testCompileOnly("org.jspecify:jspecify:1.0.0")
     // Note: fabric-loader-junit is added by modstitch.unitTesting() for Fabric
     if (!isFabric) {
-        testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
+        testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
     }
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.3")
     testImplementation("com.google.jimfs:jimfs:1.3.0") {
         exclude(group = "com.google.guava", module = "guava")
     }
 }
+// endregion
 
-// ========== Tasks ==========
+// region Tasks
 tasks.test {
     useJUnitPlatform()
     // Disable tests for unsupported platforms
     if (!supportsUnitTesting) {
         enabled = false
+    }
+}
+
+tasks.withType<JavaExec>().configureEach {
+    if (name == "runClient") {
+        workingDir(rootProject.layout.projectDirectory.dir("run"))
     }
 }
 
@@ -160,7 +214,7 @@ java {
     withSourcesJar()
 }
 
-// Allow duplicate entries in jar and resources (e.g. refmap from both AP and resources)
+// Demo resources include both legacy and template-generated metadata/refmaps.
 tasks.withType<Jar>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
@@ -175,13 +229,14 @@ if (isForge) {
     }
 }
 
-// ========== Publishing ==========
-val buildAndCollect by tasks.registering(Copy::class) {
-    group = "build"
-    dependsOn(modstitch.finalJarTask, tasks.named("sourcesJar"))
+// endregion
+
+// region Publishing
+val sourcesJar = tasks.named<Jar>("sourcesJar")
+rootProject.tasks.named<Sync>("buildAndCollect") {
+    dependsOn(modstitch.finalJarTask, sourcesJar)
     from(modstitch.finalJarTask.flatMap { it.archiveFile })
-    from(tasks.named("sourcesJar").flatMap { (it as org.gradle.jvm.tasks.Jar).archiveFile })
-    into(rootProject.layout.buildDirectory.dir("libs"))
+    from(sourcesJar.flatMap { it.archiveFile })
 }
 
 // read changelog
@@ -230,12 +285,12 @@ afterEvaluate {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            artifactId = "perspective_api_demo"
+            artifactId = modIdValue
             version = "$modVersionString+$loader-$mcVersion"
             from(components["java"])
             pom {
-                name.set("Perspective API Demo")
-                description.set("Demonstration for Perspective API")
+                name.set(modNameValue)
+                description.set(modDescriptionValue)
             }
         }
     }
@@ -244,8 +299,10 @@ publishing {
         mavenLocal()
     }
 }
+// endregion
 
-// ========== Helpers ==========
-fun <T> prop(property: String, block: (String) -> T?): T? {
-    return findProperty(property)?.toString()?.takeIf { it.isNotBlank() }?.let(block)
-}
+// region Helpers
+fun requiredProp(property: String): String =
+    findProperty(property)?.toString()?.takeIf { it.isNotBlank() }
+        ?: error("Required Gradle property '$property' is missing or blank")
+// endregion
