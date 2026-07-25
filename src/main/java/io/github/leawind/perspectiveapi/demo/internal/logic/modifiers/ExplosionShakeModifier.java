@@ -7,7 +7,6 @@ import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
-import org.joml.Vector3d;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -31,11 +30,6 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
   private static final double PHASE_1 = 0.0;
   private static final double PHASE_2 = 2.1;
   private static final double PHASE_3 = 4.2;
-
-  @Override
-  public @NonNull String id() {
-    return ID;
-  }
 
   @Override
   public void apply(PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
@@ -79,7 +73,11 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
         new Quaternionf().rotationAxis((float) Math.toRadians(pitchShake), PerspectiveMath.RIGHT);
     Quaternionf rollRot =
         new Quaternionf().rotationAxis((float) Math.toRadians(rollShake), PerspectiveMath.FORWARD);
-    state.rotation().mul(pitchRot, state.rotation()).mul(yawRot, state.rotation()).mul(rollRot, state.rotation());
+    state
+        .rotation()
+        .mul(pitchRot, state.rotation())
+        .mul(yawRot, state.rotation())
+        .mul(rollRot, state.rotation());
   }
 
   private static double getInfluence(
