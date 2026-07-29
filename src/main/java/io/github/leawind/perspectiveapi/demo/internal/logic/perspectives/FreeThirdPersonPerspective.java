@@ -7,6 +7,8 @@ import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.MouseScrollContext;
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.context.MouseTurnPlayerContext;
 import io.github.leawind.perspectiveapi.demo.internal.utils.ExpSmoothDouble;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -23,96 +25,34 @@ import org.jspecify.annotations.NonNull;
 @PerspectiveBehavior.Info(
     id = FreeThirdPersonPerspective.ID,
     priority = 10,
-    nameKey = "perspective.perspective_api_demo.free_third_person.name",
     baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)
-@SuppressWarnings("unused")
-public class FreeThirdPersonPerspective implements PerspectiveBehavior {
+public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
   public static final String ID = "perspective_api_demo.free_third_person";
 
-  public final Vector3d position = new Vector3d();
-  public final Quaternionf rotation = new Quaternionf();
+  private static final float MOUSE_ROTATION_SCALE = 0.15f;
+  private static final float DEFAULT_FOV_DEG = 70.0f;
+  private static final double DEFAULT_DISTANCE = 4.0;
+  private static final double ZOOM_SCROLL_BASE = 1.1487;
 
+  private final Vector3d position = new Vector3d();
+  private final Quaternionf rotation = new Quaternionf();
   private final Vector2f eulerDeg = new Vector2f();
+  private final ExpSmoothDouble smoothFovHalfTan =
+      new ExpSmoothDouble(100, getFrustumHalfHeight(DEFAULT_DISTANCE, DEFAULT_FOV_DEG) / 4.0);
 
-  private static double getFrustumHalfHeight(double distance, float fovDeg) {
-    double fovRad = fovDeg / 180d * Math.PI;
-    return distance * Math.tan(fovRad / 2);
-  }
-
-  public double frustumHalfHeight = getFrustumHalfHeight(4.0, 70.0f);
-
-  public final ExpSmoothDouble smoothFovHalfTan = new ExpSmoothDouble(100, frustumHalfHeight / 4.0);
-
-  public double getDistance(double now) {
-    return frustumHalfHeight / smoothFovHalfTan.get(now);
-  }
-
-  private float getFieldOfViewValue() {
-    double now = System.currentTimeMillis();
-    return (float) (2 * Math.atan(smoothFovHalfTan.get(now)) * 180d / Math.PI);
-  }
-
+  private double frustumHalfHeight = getFrustumHalfHeight(DEFAULT_DISTANCE, DEFAULT_FOV_DEG);
   private boolean needInit = true;
 
-  public void rotate(float deltaYaw, float deltaPitch) {
+  private void rotate(float deltaYaw, float deltaPitch) {
     eulerDeg.y += deltaYaw;
     eulerDeg.x = Math.max(-90f, Math.min(90f, eulerDeg.x + deltaPitch));
   }
 
   @Override
   public void init() {
-
-    GameClientEvents.MOUSE_TURN_PLAYER.on(
-        e -> {
-          if (PerspectiveAPI.isCurrent(ID)) {
-            rotate((float) e.dx * 0.15f, (float) e.dy * 0.15f);
-            e.cancelDefault = true;
-          }
-        });
-
-    GameClientEvents.MOUSE_SCROLL.on(
-        ctx -> {
-          if (Minecraft.getInstance().isPaused()) return;
-          if (PerspectiveAPI.isCurrent(ID)) {
-            float factor = (float) Math.pow(1.1487, -ctx.yOffset);
-            smoothFovHalfTan.setTarget(smoothFovHalfTan.getTarget() * factor);
-            ctx.cancelDefault = true;
-          }
-        });
-
-    GameClientEvents.TICK_KEYBOARD_INPUT.on(
-        impulse -> {
-          if (PerspectiveAPI.isCurrent(ID)) {
-            var minecraft = Minecraft.getInstance();
-            if (minecraft == null) return;
-            var player = minecraft.player;
-            if (player == null) return;
-
-            Vec2 playerRotVec = player.getRotationVector();
-            Quaternionf playerRotation =
-                PerspectiveMath.eulerDegToQuat(
-                    new Vector2f(playerRotVec.x, playerRotVec.y), new Quaternionf());
-
-            var moveVector = new Vector3f(-impulse.x, 0, -impulse.y);
-
-            {
-              rotation.transform(moveVector, moveVector);
-              playerRotation.transformInverse(moveVector, moveVector);
-            }
-
-            {
-              var movement = player.getDeltaMovement();
-              if (movement.lengthSqr() > 0.01f) {
-                var orientation =
-                    PerspectiveMath.directionToEulerDeg(movement.toVector3f(), new Vector2f());
-                player.setYRot(orientation.y);
-              }
-            }
-
-            impulse.x = -moveVector.x;
-            impulse.y = -moveVector.z;
-          }
-        });
+    GameClientEvents.MOUSE_TURN_PLAYER.on(this::onMouseTurnPlayer);
+    GameClientEvents.MOUSE_SCROLL.on(this::onMouseScroll);
+    GameClientEvents.TICK_KEYBOARD_INPUT.on(this::onKeyboardInput);
   }
 
   @Override
@@ -124,7 +64,8 @@ public class FreeThirdPersonPerspective implements PerspectiveBehavior {
   public void clientTickWhenActive(Minecraft minecraft) {
     Entity entity = minecraft.getCameraEntity();
     if (entity == null) return;
-    frustumHalfHeight = getFrustumHalfHeight(4 * entity.getBoundingBox().getSize(), 70.0f);
+    frustumHalfHeight =
+        getFrustumHalfHeight(4 * entity.getBoundingBox().getSize(), DEFAULT_FOV_DEG);
   }
 
   @Override
@@ -160,5 +101,57 @@ public class FreeThirdPersonPerspective implements PerspectiveBehavior {
     state.position().set(this.position);
     state.rotation().set(this.rotation);
     state.setFovDeg(getFieldOfViewValue());
+  }
+
+  private void onMouseTurnPlayer(MouseTurnPlayerContext input) {
+    if (!PerspectiveAPI.isCurrent(ID)) return;
+
+    rotate((float) input.dx * MOUSE_ROTATION_SCALE, (float) input.dy * MOUSE_ROTATION_SCALE);
+    input.cancelDefault();
+  }
+
+  private void onMouseScroll(MouseScrollContext input) {
+    if (Minecraft.getInstance().isPaused() || !PerspectiveAPI.isCurrent(ID)) return;
+
+    float zoomFactor = (float) Math.pow(ZOOM_SCROLL_BASE, -input.yOffset);
+    smoothFovHalfTan.setTarget(smoothFovHalfTan.getTarget() * zoomFactor);
+    input.cancelDefault = true;
+  }
+
+  private void onKeyboardInput(Vector2f impulse) {
+    if (!PerspectiveAPI.isCurrent(ID)) return;
+
+    var player = Minecraft.getInstance().player;
+    if (player == null) return;
+
+    Vec2 playerRotationDeg = player.getRotationVector();
+    Quaternionf playerRotation =
+        PerspectiveMath.eulerDegToQuat(
+            new Vector2f(playerRotationDeg.x, playerRotationDeg.y), new Quaternionf());
+    Vector3f moveVector = new Vector3f(-impulse.x, 0, -impulse.y);
+    rotation.transform(moveVector, moveVector);
+    playerRotation.transformInverse(moveVector, moveVector);
+
+    var movement = player.getDeltaMovement();
+    if (movement.lengthSqr() > 0.01f) {
+      var orientation = PerspectiveMath.directionToEulerDeg(movement.toVector3f(), new Vector2f());
+      player.setYRot(orientation.y);
+    }
+
+    impulse.x = -moveVector.x;
+    impulse.y = -moveVector.z;
+  }
+
+  private static double getFrustumHalfHeight(double distance, float fovDeg) {
+    return distance * Math.tan(Math.toRadians(fovDeg) / 2);
+  }
+
+  private double getDistance(double now) {
+    return frustumHalfHeight / smoothFovHalfTan.get(now);
+  }
+
+  private float getFieldOfViewValue() {
+    return (float)
+        (2 * Math.atan(smoothFovHalfTan.get(System.currentTimeMillis())) * 180d / Math.PI);
   }
 }

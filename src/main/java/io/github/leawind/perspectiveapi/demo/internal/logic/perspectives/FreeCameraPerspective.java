@@ -7,11 +7,13 @@ import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.MouseScrollContext;
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.context.MouseTurnPlayerContext;
 import net.minecraft.client.Minecraft;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -27,36 +29,23 @@ import org.lwjgl.glfw.GLFW;
 @PerspectiveBehavior.Info(
     id = FreeCameraPerspective.ID,
     priority = 10,
-    nameKey = "perspective.perspective_api_demo.free_camera.name",
     baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)
-@SuppressWarnings("unused")
-public class FreeCameraPerspective implements PerspectiveBehavior {
+public final class FreeCameraPerspective implements PerspectiveBehavior {
   public static final String ID = "perspective_api_demo.free_camera";
 
+  private static final float MOUSE_ROTATION_SCALE = 0.15f;
   private static final float ROLL_SPEED = 90.0f;
   private static final float BASE_SPEED = 10.0f;
+  private static final float SCROLL_SPEED_STEP = 0.5f;
 
   private double lastTickSeconds;
-  private float speedFactor = 0.0f;
+  private float speedFactor;
 
   private boolean needInit = true;
-  public final Vector3d position = new Vector3d();
-  public final Quaternionf rotation = new Quaternionf();
+  private final Vector3d position = new Vector3d();
+  private final Quaternionf rotation = new Quaternionf();
 
-  private void applyMove(Vector3fc delta, float multiplier) {
-    applyMove(delta.mul(multiplier, new Vector3f()));
-  }
-
-  private void applyMove(Vector3f delta) {
-    rotation.transform(delta);
-    position.add(delta);
-  }
-
-  private void applyMove(Vector3fc delta) {
-    applyMove(new Vector3f(delta));
-  }
-
-  public void rotate(float deltaYaw, float deltaPitch) {
+  private void rotate(float deltaYaw, float deltaPitch) {
     Quaternionf yawRot =
         new Quaternionf().rotationAxis((float) Math.toRadians(deltaYaw), PerspectiveMath.DOWN);
     rotation.mul(yawRot, rotation);
@@ -66,7 +55,7 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
     rotation.mul(pitchRot, rotation);
   }
 
-  public void roll(float deltaRoll) {
+  private void roll(float deltaRoll) {
     Quaternionf rollRot =
         new Quaternionf().rotationAxis((float) Math.toRadians(deltaRoll), PerspectiveMath.FORWARD);
     rotation.mul(rollRot, rotation);
@@ -74,41 +63,10 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
 
   @Override
   public void init() {
-    GameClientEvents.MOUSE_TURN_PLAYER.on(
-        e -> {
-          if (PerspectiveAPI.isCurrent(ID)) {
-            rotate((float) e.dx * 0.15f, (float) e.dy * 0.15f);
-            e.cancelDefault = true;
-          }
-        });
-    GameClientEvents.MOUSE_SCROLL.on(
-        ctx -> {
-          if (Minecraft.getInstance().isPaused()) return;
-          if (PerspectiveAPI.isCurrent(ID)) {
-            speedFactor += (float) ctx.yOffset * 0.5f;
-            ctx.cancelDefault = true;
-          }
-        });
-    GameClientEvents.TICK_KEYBOARD_INPUT.on(
-        impulse -> {
-          if (PerspectiveAPI.isCurrent(ID)) {
-            impulse.set(0);
-          }
-        });
-    GameClientEvents.HANDLE_KEYBINDS_START.on(
-        (minecraft) -> {
-          if (!PerspectiveAPI.isCurrent(ID)) return;
-
-          while (minecraft.options.keyUp.consumeClick()) {}
-          while (minecraft.options.keyDown.consumeClick()) {}
-          while (minecraft.options.keyLeft.consumeClick()) {}
-          while (minecraft.options.keyRight.consumeClick()) {}
-          while (minecraft.options.keyJump.consumeClick()) {}
-          while (minecraft.options.keyShift.consumeClick()) {}
-
-          while (minecraft.options.keyInventory.consumeClick()) {}
-          while (minecraft.options.keyDrop.consumeClick()) {}
-        });
+    GameClientEvents.MOUSE_TURN_PLAYER.on(this::onMouseTurnPlayer);
+    GameClientEvents.MOUSE_SCROLL.on(this::onMouseScroll);
+    GameClientEvents.TICK_KEYBOARD_INPUT.on(this::onKeyboardInput);
+    GameClientEvents.HANDLE_KEYBINDS_START.on(this::onHandleKeybindsStart);
   }
 
   @Override
@@ -116,6 +74,7 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
     needInit = true;
   }
 
+  @SuppressWarnings("ConstantConditions")
   @Override
   public void preApplyWhenActive(@NonNull PerspectiveContext context) {
     double now = GLFW.glfwGetTime();
@@ -131,35 +90,30 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
     if (minecraft == null) return;
 
     var options = minecraft.options;
-    if (options != null) {
-      float moveMultiplier = deltaTime * BASE_SPEED * (float) Math.pow(2, speedFactor);
+    if (options == null) return;
 
-      if (options.keyUp.isDown()) {
-        applyMove(PerspectiveMath.FORWARD, moveMultiplier);
-      }
-      if (options.keyDown.isDown()) {
-        applyMove(PerspectiveMath.BACKWARD, moveMultiplier);
-      }
-      if (options.keyLeft.isDown()) {
-        applyMove(PerspectiveMath.LEFT, moveMultiplier);
-      }
-      if (options.keyRight.isDown()) {
-        applyMove(PerspectiveMath.RIGHT, moveMultiplier);
-      }
-      if (options.keyShift.isDown()) {
-        applyMove(PerspectiveMath.DOWN, moveMultiplier);
-      }
-      if (options.keyJump.isDown()) {
-        applyMove(PerspectiveMath.UP, moveMultiplier);
-      }
+    // moveDirection: local
+    Vector3f moveDirection = new Vector3f();
+    if (options.keyUp.isDown()) moveDirection.add(PerspectiveMath.FORWARD);
+    if (options.keyDown.isDown()) moveDirection.add(PerspectiveMath.BACKWARD);
+    if (options.keyLeft.isDown()) moveDirection.add(PerspectiveMath.LEFT);
+    if (options.keyRight.isDown()) moveDirection.add(PerspectiveMath.RIGHT);
+    if (options.keyShift.isDown()) moveDirection.add(PerspectiveMath.DOWN);
+    if (options.keyJump.isDown()) moveDirection.add(PerspectiveMath.UP);
 
-      if (options.keyDrop.isDown()) {
-        roll(-ROLL_SPEED * deltaTime);
-      }
-      if (options.keyInventory.isDown()) {
-        roll(ROLL_SPEED * deltaTime);
-      }
+    if (moveDirection.lengthSquared() > 0) {
+      float moveDistance = deltaTime * BASE_SPEED * (float) Math.pow(2, speedFactor);
+
+      // offset: local
+      Vector3f offset = moveDirection.mul(moveDistance);
+
+      // offset: world
+      rotation.transform(offset);
+      position.add(offset);
     }
+
+    if (options.keyDrop.isDown()) roll(-ROLL_SPEED * deltaTime);
+    if (options.keyInventory.isDown()) roll(ROLL_SPEED * deltaTime);
   }
 
   @Override
@@ -173,5 +127,37 @@ public class FreeCameraPerspective implements PerspectiveBehavior {
     }
     state.position().set(this.position);
     state.rotation().set(this.rotation);
+  }
+
+  private void onMouseTurnPlayer(MouseTurnPlayerContext input) {
+    if (!PerspectiveAPI.isCurrent(ID)) return;
+
+    rotate((float) input.dx * MOUSE_ROTATION_SCALE, (float) input.dy * MOUSE_ROTATION_SCALE);
+    input.cancelDefault();
+  }
+
+  private void onMouseScroll(MouseScrollContext input) {
+    if (Minecraft.getInstance().isPaused() || !PerspectiveAPI.isCurrent(ID)) return;
+
+    speedFactor += (float) input.yOffset * SCROLL_SPEED_STEP;
+    input.cancelDefault = true;
+  }
+
+  private void onKeyboardInput(Vector2f impulse) {
+    if (PerspectiveAPI.isCurrent(ID)) impulse.set(0);
+  }
+
+  private void onHandleKeybindsStart(Minecraft minecraft) {
+    if (!PerspectiveAPI.isCurrent(ID)) return;
+
+    while (minecraft.options.keyUp.consumeClick()) {}
+    while (minecraft.options.keyDown.consumeClick()) {}
+    while (minecraft.options.keyLeft.consumeClick()) {}
+    while (minecraft.options.keyRight.consumeClick()) {}
+    while (minecraft.options.keyJump.consumeClick()) {}
+    while (minecraft.options.keyShift.consumeClick()) {}
+
+    while (minecraft.options.keyInventory.consumeClick()) {}
+    while (minecraft.options.keyDrop.consumeClick()) {}
   }
 }
