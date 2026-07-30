@@ -9,6 +9,7 @@ import net.minecraft.world.entity.Entity;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
+@SuppressWarnings({"unused", "UnstableApiUsage"})
 @AutoService(PerspectiveBehavior.class)
 @PerspectiveBehavior.Info(
     id = SimpleThirdPersonPerspective.ID,
@@ -23,7 +24,7 @@ public final class SimpleThirdPersonPerspective implements PerspectiveBehavior {
   public void applyCameraState(
       PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext context) {
 
-    Entity entity = context.entity();
+    Entity entity = context.cameraEntity();
     if (entity == null) {
       return;
     }

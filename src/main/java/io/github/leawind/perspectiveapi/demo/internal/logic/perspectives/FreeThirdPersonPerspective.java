@@ -21,6 +21,7 @@ import org.jspecify.annotations.NonNull;
 
 /// - camera orbits around the player and always faces it.
 /// - Mouse movement only rotates the camera, not the player.
+@SuppressWarnings({"unused", "UnstableApiUsage", "ConstantConditions", "MathClampMigration"})
 @AutoService(PerspectiveBehavior.class)
 @PerspectiveBehavior.Info(
     id = FreeThirdPersonPerspective.ID,
@@ -69,35 +70,34 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
   }
 
   @Override
-  public void preApplyWhenActive(@NonNull PerspectiveContext context) {
-    Entity entity = context.entity();
-    if (entity == null) return;
+  public void applyCameraState(
+      PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext context) {
+    {
+      Entity entity = context.cameraEntity();
+      if (entity == null) return;
 
-    var eyePos = entity.getEyePosition(context.partialTicks());
+      var eyePos = entity.getEyePosition(context.partialTicks());
 
-    if (needInit) {
-      Vec2 rotVec = entity.getRotationVector();
-      eulerDeg.set(rotVec.x, rotVec.y);
-      needInit = false;
+      if (needInit) {
+        Vec2 rotVec = entity.getRotationVector();
+        eulerDeg.set(rotVec.x, rotVec.y);
+        needInit = false;
+      }
+
+      PerspectiveMath.eulerDegToQuat(eulerDeg, rotation);
+      var backward = PerspectiveMath.getBackward(rotation, new Vector3f());
+      double now = System.currentTimeMillis();
+      position.set(eyePos.x, eyePos.y, eyePos.z).add(backward.mul((float) getDistance(now)));
+
+      Vector3f viewVectorToEntity =
+          new Vector3f(
+              (float) (eyePos.x - position.x),
+              (float) (eyePos.y - position.y),
+              (float) (eyePos.z - position.z));
+
+      PerspectiveMath.directionToQuat(viewVectorToEntity, rotation);
     }
 
-    PerspectiveMath.eulerDegToQuat(eulerDeg, rotation);
-    var backward = PerspectiveMath.getBackward(rotation, new Vector3f());
-    double now = System.currentTimeMillis();
-    position.set(eyePos.x, eyePos.y, eyePos.z).add(backward.mul((float) getDistance(now)));
-
-    Vector3f viewVectorToEntity =
-        new Vector3f(
-            (float) (eyePos.x - position.x),
-            (float) (eyePos.y - position.y),
-            (float) (eyePos.z - position.z));
-
-    PerspectiveMath.directionToQuat(viewVectorToEntity, rotation);
-  }
-
-  @Override
-  public void applyCameraState(
-      PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
     state.position().set(this.position);
     state.rotation().set(this.rotation);
     state.setFovDeg(getFieldOfViewValue());

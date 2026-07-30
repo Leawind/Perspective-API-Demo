@@ -31,9 +31,10 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
   private static final double PHASE_2 = 2.1;
   private static final double PHASE_3 = 4.2;
 
+  @SuppressWarnings("UnstableApiUsage")
   @Override
   public void apply(PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
-    Entity entity = ctx.entity();
+    Entity entity = ctx.cameraEntity();
     if (entity == null) return;
 
     double now = GLFW.glfwGetTime();
