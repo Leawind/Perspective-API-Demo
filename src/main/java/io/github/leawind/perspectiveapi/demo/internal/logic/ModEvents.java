@@ -14,9 +14,6 @@ public final class ModEvents {
         ExplosionShakeModifier.ID,
         () ->
             PerspectiveAPI.getModifierChain()
-                .register(
-                    ExplosionShakeModifier.ID,
-                    Integer.MAX_VALUE,
-                    new ExplosionShakeModifier()));
+                .register(Integer.MAX_VALUE, new ExplosionShakeModifier()));
   }
 }

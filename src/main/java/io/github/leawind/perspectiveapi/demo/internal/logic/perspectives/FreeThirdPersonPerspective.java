@@ -3,6 +3,7 @@ package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
+import io.github.leawind.perspectiveapi.api.PerspectiveInfo;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
@@ -23,7 +24,7 @@ import org.jspecify.annotations.NonNull;
 /// - Mouse movement only rotates the camera, not the player.
 @SuppressWarnings({"unused", "UnstableApiUsage", "ConstantConditions", "MathClampMigration"})
 @AutoService(PerspectiveBehavior.class)
-@PerspectiveBehavior.Info(
+@PerspectiveInfo.Declaration(
     id = FreeThirdPersonPerspective.ID,
     priority = 10,
     baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)

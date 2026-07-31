@@ -3,6 +3,7 @@ package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveAPI;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
+import io.github.leawind.perspectiveapi.api.PerspectiveInfo;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.api.ProjectionMode;
@@ -23,7 +24,7 @@ import org.lwjgl.glfw.GLFW;
 /// - Sprint + scroll changes the fixed distance from the camera to the player.
 @SuppressWarnings({"unused", "UnstableApiUsage"})
 @AutoService(PerspectiveBehavior.class)
-@PerspectiveBehavior.Info(
+@PerspectiveInfo.Declaration(
     id = OrthographicThirdPersonPerspective.ID,
     priority = 10,
     baseType = PerspectiveBehavior.BaseType.THIRD_PERSON_BACK)
