@@ -1,9 +1,9 @@
 package io.github.leawind.perspectiveapi.demo.internal.logic.modifiers;
 
+import io.github.leawind.perspectiveapi.api.PerspectiveContext;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveModifier;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
-import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;

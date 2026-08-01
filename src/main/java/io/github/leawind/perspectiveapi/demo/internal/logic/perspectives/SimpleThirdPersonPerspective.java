@@ -2,10 +2,10 @@ package io.github.leawind.perspectiveapi.demo.internal.logic.perspectives;
 
 import com.google.auto.service.AutoService;
 import io.github.leawind.perspectiveapi.api.PerspectiveBehavior;
+import io.github.leawind.perspectiveapi.api.PerspectiveContext;
 import io.github.leawind.perspectiveapi.api.PerspectiveInfo;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
-import io.github.leawind.perspectiveapi.api.context.PerspectiveContext;
 import net.minecraft.world.entity.Entity;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
