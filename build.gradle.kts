@@ -96,6 +96,10 @@ modstitch {
         replacementProperties.put("email", modEmail)
         replacementProperties.put("github", "Leawind/Perspective-API-Demo")
         replacementProperties.put("mc", requiredProp("meta.mcDep"))
+        replacementProperties.put(
+            "perspectiveApiVersion",
+            requiredProp("mod.perspective_api_version"),
+        )
         if (isNeoforge) {
             replacementProperties.put("loaderVersion", requiredProp("meta.loaderDep"))
         } else if (isForge) {
