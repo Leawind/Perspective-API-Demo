@@ -25,7 +25,7 @@ rootDir.resolve(".env").takeIf { it.exists() }?.readLines()?.forEach { line ->
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.9.+"
+    id("dev.kikugie.stonecutter") version "0.9.7"
 }
 
 stonecutter {
