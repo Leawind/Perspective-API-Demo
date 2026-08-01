@@ -220,10 +220,6 @@ tasks.withType<JavaCompile> {
     options.compilerArgs.add("-parameters")
 }
 
-java {
-    withSourcesJar()
-}
-
 // Demo resources include both legacy and template-generated metadata/refmaps.
 tasks.withType<Jar>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -242,11 +238,9 @@ if (isForge) {
 // endregion
 
 // region Publishing
-val sourcesJar = tasks.named<Jar>("sourcesJar")
 rootProject.tasks.named<Sync>("buildAndCollect") {
-    dependsOn(modstitch.finalJarTask, sourcesJar)
+    dependsOn(modstitch.finalJarTask)
     from(modstitch.finalJarTask.flatMap { it.archiveFile })
-    from(sourcesJar.flatMap { it.archiveFile })
 }
 
 // read changelog
@@ -259,7 +253,6 @@ afterEvaluate {
         dryRun.set(System.getenv("DRY_RUN") != "false")
         displayName.set("$modVersionString for $mcVersion $loader")
         file = modstitch.finalJarTask.flatMap { it.archiveFile }
-        additionalFiles.from(tasks.named("sourcesJar"))
         changelog.set(changelogText)
 
         type = if (modVersionString.contains("beta", true)) {
