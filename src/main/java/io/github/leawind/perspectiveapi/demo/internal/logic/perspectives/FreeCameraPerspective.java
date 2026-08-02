@@ -8,6 +8,8 @@ import io.github.leawind.perspectiveapi.api.PerspectiveInfo;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import io.github.leawind.perspectiveapi.demo.internal.bridge.events.GameClientEvents;
+import io.github.leawind.perspectiveapi.demo.internal.bridge.events.MouseScrollContext;
+import io.github.leawind.perspectiveapi.demo.internal.utils.ExpSmoothDouble;
 import net.minecraft.client.Minecraft;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
@@ -21,6 +23,7 @@ import org.lwjgl.glfw.GLFW;
 /// - mouse controls rotation
 /// - Q/E roll
 /// - scroll wheel controls movement speed
+/// - sprint + scroll wheel controls field of view
 ///
 /// The player no longer moves or turns.
 @SuppressWarnings({"unused", "UnstableApiUsage", "ConstantConditions"})
@@ -36,9 +39,14 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
   private static final float ROLL_SPEED = 90.0f;
   private static final float BASE_SPEED = 10.0f;
   private static final float SCROLL_SPEED_STEP = 0.5f;
+  private static final double ZOOM_SCROLL_BASE = 1.25;
+  private static final double ZOOM_HALFLIFE_SECONDS = 0.08;
+  private static final double MIN_FOV_HALF_TAN = Math.tan(Math.toRadians(1.0) / 2.0);
+  private static final double MAX_FOV_HALF_TAN = Math.tan(Math.toRadians(179.0) / 2.0);
 
   private double lastTickSeconds;
   private float speedFactor;
+  private ExpSmoothDouble smoothFovHalfTan;
 
   private boolean needInit = true;
   private final Vector3d position = new Vector3d();
@@ -71,13 +79,7 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
               (float) input1.dx * MOUSE_ROTATION_SCALE, (float) input1.dy * MOUSE_ROTATION_SCALE);
           input1.cancelDefault();
         });
-    GameClientEvents.MOUSE_SCROLL.on(
-        input -> {
-          if (Minecraft.getInstance().isPaused() || !PerspectiveAPI.isCurrent(ID)) return;
-
-          speedFactor += (float) input.yOffset * SCROLL_SPEED_STEP;
-          input.cancelDefault = true;
-        });
+    GameClientEvents.MOUSE_SCROLL.on(this::onMouseScroll);
     GameClientEvents.TICK_KEYBOARD_INPUT.on(
         impulse -> {
           if (PerspectiveAPI.isCurrent(ID)) impulse.set(0);
@@ -101,6 +103,7 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
   @Override
   public void onActivate() {
     needInit = true;
+    smoothFovHalfTan = null;
   }
 
   @SuppressWarnings({"ConstantConditions", "MathClampMigration"})
@@ -152,9 +155,46 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
       var eyePos = context.cameraEntity().getEyePosition(context.partialTicks());
       this.position.set(eyePos.x, eyePos.y, eyePos.z);
       this.rotation.set(state.rotation());
+      smoothFovHalfTan =
+          new ExpSmoothDouble(ZOOM_HALFLIFE_SECONDS, getFovHalfTan(state.getFovDeg()));
       needInit = false;
     }
     state.position().set(this.position);
     state.rotation().set(this.rotation);
+    if (smoothFovHalfTan != null) {
+      state.setFovDeg(getFovDeg(smoothFovHalfTan.get(GLFW.glfwGetTime())));
+    }
+  }
+
+  private void onMouseScroll(MouseScrollContext input) {
+    Minecraft minecraft = Minecraft.getInstance();
+    if (minecraft.isPaused() || !PerspectiveAPI.isCurrent(ID)) return;
+
+    if (minecraft.options.keySprint.isDown()) {
+      if (smoothFovHalfTan != null) {
+        double zoomFactor = Math.pow(ZOOM_SCROLL_BASE, -input.yOffset);
+        smoothFovHalfTan.setTarget(
+            clamp(
+                smoothFovHalfTan.getTarget() * zoomFactor,
+                MIN_FOV_HALF_TAN,
+                MAX_FOV_HALF_TAN));
+      }
+    } else {
+      speedFactor += (float) input.yOffset * SCROLL_SPEED_STEP;
+    }
+    input.cancelDefault = true;
+  }
+
+  private static double getFovHalfTan(float fovDeg) {
+    return Math.tan(Math.toRadians(fovDeg) / 2.0);
+  }
+
+  private static float getFovDeg(double fovHalfTan) {
+    return (float) Math.toDegrees(2.0 * Math.atan(fovHalfTan));
+  }
+
+  @SuppressWarnings("MathClampMigration")
+  private static double clamp(double value, double min, double max) {
+    return Math.max(min, Math.min(max, value));
   }
 }
