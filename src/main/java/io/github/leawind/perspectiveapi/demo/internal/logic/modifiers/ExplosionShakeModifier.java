@@ -78,7 +78,8 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
         .rotation()
         .mul(pitchRot, state.rotation())
         .mul(yawRot, state.rotation())
-        .mul(rollRot, state.rotation());
+        .mul(rollRot, state.rotation())
+        .normalize();
   }
 
   private static double getInfluence(

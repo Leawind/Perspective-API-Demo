@@ -51,13 +51,13 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
 
     Quaternionf pitchRot =
         new Quaternionf().rotationAxis((float) Math.toRadians(-deltaPitch), PerspectiveMath.RIGHT);
-    rotation.mul(pitchRot, rotation);
+    rotation.mul(pitchRot, rotation).normalize();
   }
 
   private void roll(float deltaRoll) {
     Quaternionf rollRot =
         new Quaternionf().rotationAxis((float) Math.toRadians(deltaRoll), PerspectiveMath.FORWARD);
-    rotation.mul(rollRot, rotation);
+    rotation.mul(rollRot, rotation).normalize();
   }
 
   @SuppressWarnings("StatementWithEmptyBody")
