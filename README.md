@@ -35,8 +35,14 @@ The camera detaches from the player entity and can be controlled independently:
 - Movement keys control camera movement
 - Space / Sneak move the camera up / down
 - Drop / Inventory keys roll the camera (rotate around the view axis)
+- Hold `Ctrl` and use the mouse scroll wheel to adjust the FOV
 
 All movements are based on the camera's local reference frame, not the world reference frame.
+
+### Orthographic View
+
+- Mouse scroll wheel adjusts the view height
+- Hold `Ctrl` and use the mouse scroll wheel to adjust the camera position (clipping distance)
 
 > [!TIP]
 > This mod is not intended for actual gameplay, so its features are not perfect—for example, in free camera mode, you can still break/place blocks with the mouse. This is not considered a bug.
