@@ -38,7 +38,11 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
 
   private final Vector3d position = new Vector3d();
   private final Quaternionf rotation = new Quaternionf();
+
+  /// Camera orientation in euler degrees. Pitch is clamped to [-90, 90], but the clamp still
+  /// permits gimbal lock: at +-90 pitch the view aligns with the yaw axis, making yaw undefined.
   private final Vector2f eulerDeg = new Vector2f();
+
   private final ExpSmoothDouble smoothFovHalfTan =
       new ExpSmoothDouble(100, getFrustumHalfHeight(DEFAULT_DISTANCE, DEFAULT_FOV_DEG) / 4.0);
 
@@ -47,6 +51,8 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
 
   private void rotate(float deltaYaw, float deltaPitch) {
     eulerDeg.y += deltaYaw;
+    // Pitch is clamped to [-90, 90] to avoid flipping, but this still allows
+    // gimbal lock: at +-90 the view aligns with the yaw axis and yaw is ineffective.
     eulerDeg.x = Math.max(-90f, Math.min(90f, eulerDeg.x + deltaPitch));
   }
 
@@ -91,6 +97,9 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
       double now = System.currentTimeMillis();
       position.set(eyePos.x, eyePos.y, eyePos.z).add(backward.mul((float) getDistance(now)));
 
+      // The final rotation is re-derived from the view vector via directionToQuat
+      // (direction -> euler -> quaternion). The conversion does not limit the pitch,
+      // so at +-90 the yaw is unrecoverable from the direction: gimbal lock.
       Vector3f viewVectorToEntity =
           new Vector3f(
               (float) (eyePos.x - position.x),
