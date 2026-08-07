@@ -55,6 +55,7 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
     GameClientEvents.MOUSE_TURN_PLAYER.on(this::onMouseTurnPlayer);
     GameClientEvents.MOUSE_SCROLL.on(this::onMouseScroll);
     GameClientEvents.TICK_KEYBOARD_INPUT.on(this::onKeyboardInput);
+    GameClientEvents.CLIENT_TICK.on(this::onClientTick);
   }
 
   @Override
@@ -62,8 +63,8 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
     needInit = true;
   }
 
-  @Override
-  public void clientTickWhenActive(Minecraft minecraft) {
+  private void onClientTick(Minecraft minecraft) {
+    if (!PerspectiveAPI.isCurrent(ID)) return;
     Entity entity = minecraft.getCameraEntity();
     if (entity == null) return;
     frustumHalfHeight =
@@ -71,7 +72,7 @@ public final class FreeThirdPersonPerspective implements PerspectiveBehavior {
   }
 
   @Override
-  public void applyCameraState(
+  public void computeCameraState(
       PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext context) {
     {
       Entity entity = context.cameraEntity();

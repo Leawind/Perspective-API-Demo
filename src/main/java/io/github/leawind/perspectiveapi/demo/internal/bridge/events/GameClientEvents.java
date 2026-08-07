@@ -21,6 +21,9 @@ public final class GameClientEvents {
   public static final SimpleEventEmitter.Owned<Vector2f> TICK_KEYBOARD_INPUT =
       SimpleEventEmitter.create();
 
+  public static final SimpleEventEmitter.Owned<Minecraft> CLIENT_TICK =
+      SimpleEventEmitter.create();
+
   public static final SimpleEventEmitter.Owned<Minecraft> HANDLE_KEYBINDS_START =
       SimpleEventEmitter.create();
 }

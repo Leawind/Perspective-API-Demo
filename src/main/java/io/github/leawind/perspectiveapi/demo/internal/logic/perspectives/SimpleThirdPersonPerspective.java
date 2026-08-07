@@ -22,7 +22,7 @@ public final class SimpleThirdPersonPerspective implements PerspectiveBehavior {
   private final Vector3f temp = new Vector3f();
 
   @Override
-  public void applyCameraState(
+  public void computeCameraState(
       PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext context) {
 
     Entity entity = context.cameraEntity();

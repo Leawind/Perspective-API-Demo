@@ -1,8 +1,8 @@
 package io.github.leawind.perspectiveapi.demo.internal.logic.modifiers;
 
-import io.github.leawind.perspectiveapi.api.PerspectiveContext;
 import io.github.leawind.perspectiveapi.api.PerspectiveMath;
 import io.github.leawind.perspectiveapi.api.PerspectiveModifier;
+import io.github.leawind.perspectiveapi.api.PerspectiveModifierContext;
 import io.github.leawind.perspectiveapi.api.PerspectiveState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -33,7 +33,8 @@ public class ExplosionShakeModifier implements PerspectiveModifier {
 
   @SuppressWarnings("UnstableApiUsage")
   @Override
-  public void apply(PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext ctx) {
+  public void apply(
+      PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveModifierContext ctx) {
     Entity entity = ctx.cameraEntity();
     if (entity == null) return;
 

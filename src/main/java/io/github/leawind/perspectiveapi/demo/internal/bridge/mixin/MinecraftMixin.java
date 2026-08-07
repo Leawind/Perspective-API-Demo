@@ -10,6 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
 
+  @Inject(method = "tick", at = @At("HEAD"))
+  private void onClientTick(CallbackInfo ci) {
+    GameClientEvents.CLIENT_TICK.emit((Minecraft) (Object) this);
+  }
+
   @Inject(method = "handleKeybinds", at = @At(value = "HEAD"))
   private void beforeHandleKeybinds(CallbackInfo ci) {
     GameClientEvents.HANDLE_KEYBINDS_START.emit((Minecraft) (Object) this);

@@ -47,7 +47,7 @@ public final class OrthographicThirdPersonPerspective implements PerspectiveBeha
   }
 
   @Override
-  public void applyCameraState(
+  public void computeCameraState(
       PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext context) {
     Entity entity = context.cameraEntity();
     if (entity == null) return;

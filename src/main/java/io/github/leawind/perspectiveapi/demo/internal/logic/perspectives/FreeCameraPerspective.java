@@ -108,7 +108,7 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
 
   @SuppressWarnings({"ConstantConditions", "MathClampMigration"})
   @Override
-  public void applyCameraState(
+  public void computeCameraState(
       PerspectiveState.@NonNull Mutable state, @NonNull PerspectiveContext context) {
 
     {
@@ -174,10 +174,7 @@ public final class FreeCameraPerspective implements PerspectiveBehavior {
       if (smoothFovHalfTan != null) {
         double zoomFactor = Math.pow(ZOOM_SCROLL_BASE, -input.yOffset);
         smoothFovHalfTan.setTarget(
-            clamp(
-                smoothFovHalfTan.getTarget() * zoomFactor,
-                MIN_FOV_HALF_TAN,
-                MAX_FOV_HALF_TAN));
+            clamp(smoothFovHalfTan.getTarget() * zoomFactor, MIN_FOV_HALF_TAN, MAX_FOV_HALF_TAN));
       }
     } else {
       speedFactor += (float) input.yOffset * SCROLL_SPEED_STEP;
